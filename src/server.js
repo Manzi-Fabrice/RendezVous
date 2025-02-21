@@ -1,48 +1,45 @@
 import express from 'express';
 import cors from 'cors';
-import path from 'path';
 import morgan from 'morgan';
+import dotenv from 'dotenv';
+import connectDB from './db';
 
-// initialize
+import userRoutes from './routes/userRoutes';
+import eventRoutes from './routes/eventRoutes';
+import activityRoutes from './routes/activityRoutes';
+
+// Load environment variables
+dotenv.config();
+
+// Initialize Express app
 const app = express();
 
-// enable/disable cross origin resource sharing if necessary
+// Middleware setup
 app.use(cors());
-
-// enable/disable http request logging
 app.use(morgan('dev'));
+app.use(express.json()); // Enable JSON body parsing
 
-// enable only if you want templating
-app.set('view engine', 'ejs');
+// Connect to MongoDB
+connectDB();
 
-// enable only if you want static assets from folder static
-app.use(express.static('static'));
+// Routes
+app.use('/api/users', userRoutes);
+app.use('/api/events', eventRoutes);
+app.use('/api/activities', activityRoutes);
 
-// this just allows us to render ejs from the ../app/views directory
-app.set('views', path.join(__dirname, '../src/views'));
-
-// enable json message body for posting data to API
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json()); // To parse the incoming requests with JSON payloads
-
-// additional init stuff should go before hitting the routing
-
-// default index route
+// Root endpoint (Hello World check)
 app.get('/', (req, res) => {
-  res.send('hi');
+  res.send('🔥 API is running...');
 });
 
-// START THE SERVER
-// =============================================================================
-async function startServer() {
-  try {
-    const port = process.env.PORT || 9090;
-    app.listen(port);
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: 'Internal Server Error' });
+});
 
-    console.log(`Listening on port ${port}`);
-  } catch (error) {
-    console.error(error);
-  }
-}
-
-startServer();
+// Start server
+const PORT = process.env.PORT || 9090;
+app.listen(PORT, () => {
+  console.log(`🚀 Server is running on port ${PORT}`);
+});
