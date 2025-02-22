@@ -1,24 +1,29 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
-function ActivitiesList() {
-  const [activities, setActivities] = useState([]);
+function CreateUser() {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
 
-  useEffect(() => {
-    fetch('https://project-api-sustainable-waste.onrender.com/')
-      .then((res) => res.json())
-      .then((data) => setActivities(data));
-  }, []);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const response = await fetch('https://project-api-sustainable-waste.onrender.com/api/users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name, email, password: '123456', preferences: [],
+      }),
+    });
+    const data = await response.json();
+    console.log('Created User:', data);
+  };
 
   return (
-    <div>
-      <h2>Activities List</h2>
-      <ul>
-        {activities.map((activity) => (
-          <li key={activity._id}>{activity.title} - {activity.category}</li>
-        ))}
-      </ul>
-    </div>
+    <form onSubmit={handleSubmit}>
+      <input type="text" placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} required />
+      <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+      <button type="submit">Create User</button>
+    </form>
   );
 }
 
-export default ActivitiesList;
+export default CreateUser;

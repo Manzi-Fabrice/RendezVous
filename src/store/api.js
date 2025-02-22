@@ -1,4 +1,4 @@
-export const API_URL = 'https://project-api-sustainable-waste.onrender.com/';
+export const API_URL = 'https://project-api-sustainable-waste.onrender.com/api';
 
 export const fetchUsers = async () => {
   const response = await fetch(`${API_URL}/users`);
