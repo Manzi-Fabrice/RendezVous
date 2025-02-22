@@ -1,33 +1,27 @@
 import mongoose from 'mongoose';
-import dotenv from 'dotenv';
 
-// Load environment variables
-dotenv.config();
+const mongoURI = process.env.MONGO_URI || "mongodb+srv://niyigabamanzifabrice:1opiB1L7WZl109B3@cluster0.w4yli.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
-// MongoDB Connection Function
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(mongoURI);
 
-    console.log('🔥 MongoDB Connected Successfully!');
+    console.log(`MongoDB Connected Successfully!`);
   } catch (error) {
-    console.error('❌ MongoDB Connection Error:', error.message);
-    setTimeout(connectDB, 5000); // Retry connection after 5 seconds
+    console.error('MongoDB Connection Error:', error.message);
+    process.exit(1);
   }
 };
 
-// Handle connection events
+// Handle MongoDB Disconnection
 mongoose.connection.on('disconnected', () => {
-  console.warn('⚠️ MongoDB Disconnected. Attempting Reconnection...');
+  console.warn('MongoDB Disconnected. Attempting Reconnection...');
   connectDB();
 });
 
+// Handle MongoDB Errors
 mongoose.connection.on('error', (err) => {
-  console.error('❌ MongoDB Error:', err);
+  console.error(' MongoDB Error:', err);
 });
 
-// Export the connection function
 export default connectDB;
