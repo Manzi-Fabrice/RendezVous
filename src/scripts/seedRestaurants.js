@@ -2,72 +2,101 @@ import mongoose from 'mongoose';
 import Restaurant from '../models/Restaurant.js';
 import connectDB from '../db.js';
 
-const testRestaurants = [
+const realRestaurants = [
   {
-    name: "Italian Delight",
-    cuisine: ["Italian", "Mediterranean"],
+    name: "Gramercy Tavern",
+    cuisine: ["American", "Contemporary"],
     location: {
       type: "Point",
-      coordinates: [-73.935242, 40.730610]
+      coordinates: [-73.9884, 40.7385]
+    },
+    priceRange: "$$$$",
+    rating: 4.8,
+    features: ["Fine Dining", "Vegetarian Options", "Wine List"],
+    popularDishes: ["Seasonal Tasting Menu", "Duck Breast", "Chocolate Bread Pudding"],
+    openingHours: {
+      "Monday": { open: "17:00", close: "22:00" },
+      "Tuesday": { open: "17:00", close: "22:00" },
+      "Wednesday": { open: "17:00", close: "22:00" },
+      "Thursday": { open: "17:00", close: "22:00" },
+      "Friday": { open: "17:00", close: "23:00" },
+      "Saturday": { open: "17:00", close: "23:00" },
+      "Sunday": { open: "17:00", close: "22:00" }
+    },
+    ambiance: ["Fine Dining", "Romantic", "Upscale"],
+    description: "Iconic fine-dining destination offering refined American cuisine in a sophisticated setting",
+    imageUrl: "https://example.com/gramercy-tavern.jpg"
+  },
+  {
+    name: "Lombardi's Pizza",
+    cuisine: ["Italian", "Pizza"],
+    location: {
+      type: "Point",
+      coordinates: [-73.9957, 40.7217]
     },
     priceRange: "$$",
     rating: 4.5,
-    features: ["Vegetarian", "Outdoor Seating"],
-    popularDishes: ["Margherita Pizza", "Pasta Carbonara"],
+    features: ["Historic", "Family-Friendly", "Casual"],
+    popularDishes: ["Margherita Pizza", "Clam Pizza", "Meatballs"],
     openingHours: {
-      "Monday": { open: "11:00", close: "22:00" },
-      "Tuesday": { open: "11:00", close: "22:00" },
-      "Wednesday": { open: "11:00", close: "22:00" },
-      "Thursday": { open: "11:00", close: "23:00" },
-      "Friday": { open: "11:00", close: "23:00" },
-      "Saturday": { open: "12:00", close: "23:00" },
-      "Sunday": { open: "12:00", close: "22:00" }
+      "Monday": { open: "11:30", close: "23:00" },
+      "Tuesday": { open: "11:30", close: "23:00" },
+      "Wednesday": { open: "11:30", close: "23:00" },
+      "Thursday": { open: "11:30", close: "23:00" },
+      "Friday": { open: "11:30", close: "00:00" },
+      "Saturday": { open: "11:30", close: "00:00" },
+      "Sunday": { open: "11:30", close: "23:00" }
     },
-    ambiance: ["Casual", "Family-Friendly"]
+    ambiance: ["Casual", "Historic", "Lively"],
+    description: "America's first pizzeria, serving coal-fired pizza since 1905",
+    imageUrl: "https://example.com/lombardis.jpg"
   },
   {
-    name: "Sushi Master",
-    cuisine: ["Japanese", "Sushi"],
+    name: "Morimoto",
+    cuisine: ["Japanese", "Sushi", "Asian Fusion"],
     location: {
       type: "Point",
-      coordinates: [-73.936242, 40.731610]
+      coordinates: [-74.0083, 40.7399]
     },
-    priceRange: "$$$",
-    rating: 4.8,
-    features: ["Vegetarian", "Gluten-Free"],
-    popularDishes: ["Dragon Roll", "Salmon Nigiri"],
+    priceRange: "$$$$",
+    rating: 4.7,
+    features: ["Celebrity Chef", "Sushi Bar", "Vegetarian Options"],
+    popularDishes: ["Omakase", "Rock Shrimp Tempura", "Black Cod Miso"],
     openingHours: {
-      "Monday": { open: "12:00", close: "22:00" },
-      "Tuesday": { open: "12:00", close: "22:00" },
-      "Wednesday": { open: "12:00", close: "22:00" },
-      "Thursday": { open: "12:00", close: "22:00" },
-      "Friday": { open: "12:00", close: "23:00" },
-      "Saturday": { open: "13:00", close: "23:00" },
-      "Sunday": { open: "13:00", close: "21:00" }
+      "Monday": { open: "17:00", close: "22:30" },
+      "Tuesday": { open: "17:00", close: "22:30" },
+      "Wednesday": { open: "17:00", close: "22:30" },
+      "Thursday": { open: "17:00", close: "22:30" },
+      "Friday": { open: "17:00", close: "23:30" },
+      "Saturday": { open: "17:00", close: "23:30" },
+      "Sunday": { open: "17:00", close: "22:00" }
     },
-    ambiance: ["Fine Dining"]
+    ambiance: ["Modern", "Upscale", "Trendy"],
+    description: "Iron Chef Masaharu Morimoto's flagship restaurant offering innovative Japanese cuisine",
+    imageUrl: "https://example.com/morimoto.jpg"
   },
   {
-    name: "Taco Fiesta",
-    cuisine: ["Mexican", "Latin"],
+    name: "Le Bernardin",
+    cuisine: ["French", "Seafood"],
     location: {
       type: "Point",
-      coordinates: [-73.937242, 40.732610]
+      coordinates: [-73.9819, 40.7615]
     },
-    priceRange: "$",
-    rating: 4.2,
-    features: ["Family-Friendly", "Outdoor Seating"],
-    popularDishes: ["Street Tacos", "Guacamole"],
+    priceRange: "$$$$",
+    rating: 4.9,
+    features: ["Michelin Starred", "Wine List", "Jacket Required"],
+    popularDishes: ["Tuna Carpaccio", "Lobster Tail", "Chocolate-Olive Oil Cremeux"],
     openingHours: {
-      "Monday": { open: "11:00", close: "21:00" },
-      "Tuesday": { open: "11:00", close: "21:00" },
-      "Wednesday": { open: "11:00", close: "21:00" },
-      "Thursday": { open: "11:00", close: "21:00" },
-      "Friday": { open: "11:00", close: "22:00" },
-      "Saturday": { open: "11:00", close: "22:00" },
-      "Sunday": { open: "11:00", close: "20:00" }
+      "Monday": { open: "17:45", close: "22:30" },
+      "Tuesday": { open: "17:45", close: "22:30" },
+      "Wednesday": { open: "17:45", close: "22:30" },
+      "Thursday": { open: "17:45", close: "22:30" },
+      "Friday": { open: "17:45", close: "23:00" },
+      "Saturday": { open: "17:45", close: "23:00" }
     },
-    ambiance: ["Casual"]
+    ambiance: ["Fine Dining", "Elegant", "Formal"],
+    description: "Three Michelin-starred restaurant known for exquisite seafood and impeccable French service",
+    imageUrl: "https://example.com/le-bernardin.jpg"
   }
 ];
 
@@ -84,7 +113,7 @@ const seedDatabase = async () => {
 
     // Insert new restaurants
     console.log('Inserting new restaurants...');
-    const inserted = await Restaurant.insertMany(testRestaurants);
+    const inserted = await Restaurant.insertMany(realRestaurants);
     console.log(`✅ Added ${inserted.length} restaurants to database`);
 
     // Verify the data

@@ -1,5 +1,5 @@
 import express from 'express';
-import { getRecommendations } from '../controllers/recommendationController.js';
+import { getRecommendations, getPersonalizedRecommendations } from '../controllers/recommendationController.js';
 import Restaurant from '../models/Restaurant.js';
 
 const router = express.Router();
@@ -20,5 +20,6 @@ router.post('/test-restaurant', async (req, res) => {
 
 // Update to use the new recommendations function
 router.get('/restaurants', getRecommendations);
+router.post('/personalized', getPersonalizedRecommendations);
 
 export default router;

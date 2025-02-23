@@ -19,9 +19,7 @@ const restaurantSchema = new mongoose.Schema({
   },
   features: [{ 
     type: String,
-    enum: ['Fine Dining', 'Vegetarian Options', 'Wine List', 'Sushi Bar', 
-           'Historic', 'Family-Friendly', 'Casual', 'Celebrity Chef', 
-           'Michelin Starred', 'Jacket Required']
+    enum: ['Vegetarian', 'Vegan', 'Halal', 'Gluten-Free', 'Family-Friendly', 'Outdoor Seating']
   }],
   popularDishes: [{
     type: String
@@ -35,11 +33,8 @@ const restaurantSchema = new mongoose.Schema({
   },
   ambiance: [{ 
     type: String,
-    enum: ['Fine Dining', 'Romantic', 'Upscale', 'Casual', 'Historic', 
-           'Lively', 'Modern', 'Trendy', 'Elegant', 'Formal']
-  }],
-  description: { type: String },
-  imageUrl: { type: String }
+    enum: ['Casual', 'Fine Dining', 'Fast Food', 'Cafe', 'Pub']
+  }]
 }, { 
   strict: false,  // This will allow fields not in schema
   collection: 'restaurants' // Explicitly set collection name

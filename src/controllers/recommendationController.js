@@ -1,75 +1,8 @@
 import Restaurant from '../models/Restaurant.js';
 import mongoose from 'mongoose';
-
-// export const getFilteredRestaurants = async (req, res) => {
-//   try {
-//     console.log("✅ Fetching restaurant recommendations...");
-
-//     // Hardcoded test preferences (since no authentication)
-//     const foodPreferences = ["Italian", "Mexican"]; // Replace with actual values from frontend
-//     const maxDistance = 10; // Optional, distance in km (not implemented yet)
-
-//     // Debugging: Log MongoDB Connection
-//     console.log(`🔍 Connected to MongoDB: ${process.env.MONGO_URI}`);
-
-//     // Construct query for MongoDB
-//     let query = {
-//       cuisine: { $in: foodPreferences } // Matches at least one preferred cuisine
-//     };
-
-//     // (Optional) If maxDistance is provided, filter by location (not implemented yet)
-//     /*
-//     if (maxDistance) {
-//       query.location = {
-//         $near: {
-//           $geometry: { type: "Point", coordinates: [-73.935242, 40.730610] }, // Example: NYC coordinates
-//           $maxDistance: maxDistance * 1000 // Convert km to meters
-//         }
-//       };
-//     }
-//     */
-
-//     console.log("🔍 Query being used:", JSON.stringify(query, null, 2));
-
-//     // Fetch restaurants based on query
-//     const restaurants = await Restaurant.find(query).limit(10);
-
-//     // Debugging: Check if restaurants were found
-//     console.log(`✅ Found ${restaurants.length} restaurants`);
-
-//     // Return filtered results
-//     res.json({ recommendations: restaurants });
-//   } catch (error) {
-//     console.error("❌ Error fetching recommendations:", error);
-//     res.status(500).json({ error: `Failed to fetch recommendations: ${error.message}` });
-//   }
-// };
-// export const getFilteredRestaurants = async (req, res) => {
-//     try {
-//       console.log("✅ Fetching restaurant recommendations...");
-  
-//       // Hardcoded test preferences for now
-//       const foodPreferences = ["Italian", "Mexican"];
-  
-//       console.log(`🔍 Searching for cuisines: ${JSON.stringify(foodPreferences)}`);
-  
-//       // Use a simple $in query without $elemMatch
-//       let query = {
-//         cuisine: { $in: foodPreferences }
-//       };
-  
-//       console.log("🔍 MongoDB Query:", JSON.stringify(query, null, 2));
-  
-//       const restaurants = await Restaurant.find(query).limit(10);
-  
-//       console.log(`✅ Found ${restaurants.length} restaurants`);
-  
-//       res.json({ recommendations: restaurants });
-//     } catch (error) {
-//       console.error("❌ Error fetching recommendations:", error);
-//       res.status(500).json({ error: `Failed to fetch recommendations: ${error.message}` });
-//     }
-//   };
+import { fetchNearbyRestaurants } from '../services/googlePlaces.js';
+import { calculateDistance } from '../utils/distance.js';
+import { getAIRecommendations } from '../services/openai.js';
 
 
 export const getFilteredRestaurants = async (req, res) => {
@@ -112,96 +45,84 @@ export const getFilteredRestaurants = async (req, res) => {
 
 export const getRecommendations = async (req, res) => {
   try {
-    const {
+    const { 
+      location = { lat: 40.7128, lng: -74.0060 },
       cuisinePreferences = [],
-      priceRange,
       features = [],
-      location,
-      radius = 5000, // meters
-      minRating = 0,
-      timeOfDay,
-      ambiance = []
+      priceRange,
+      radius = 5000 
     } = req.query;
 
-    // Base query
-    let query = {};
+    console.log('📍 Fetching restaurants with params:', { location, cuisinePreferences });
 
-    // Cuisine preferences with weighted scoring
-    if (cuisinePreferences.length > 0) {
-      query.cuisine = { $in: cuisinePreferences };
-    }
+    // Pass preferences to the service
+    const restaurants = await fetchNearbyRestaurants({
+      lat: parseFloat(location.lat),
+      lng: parseFloat(location.lng)
+    }, {
+      cuisinePreferences: Array.isArray(cuisinePreferences) 
+        ? cuisinePreferences 
+        : [cuisinePreferences],
+      radius,
+      priceRange
+    });
 
-    // Feature matching
-    if (features.length > 0) {
-      query.features = { $in: features };
-    }
-
-    // Price range filter
-    if (priceRange) {
-      query.priceRange = priceRange;
-    }
-
-    // Location-based filtering
-    if (location) {
-      const [lng, lat] = location.split(',').map(Number);
-      query.location = {
-        $near: {
-          $geometry: {
-            type: 'Point',
-            coordinates: [lng, lat]
-          },
-          $maxDistance: radius
-        }
-      };
-    }
-
-    // Rating threshold
-    if (minRating) {
-      query.rating = { $gte: Number(minRating) };
-    }
-
-    // Get matching restaurants
-    const restaurants = await Restaurant.find(query);
-
-    // AI scoring system
+    // Enhanced scoring with more factors
     const scoredRestaurants = restaurants.map(restaurant => {
       let score = 0;
-      
-      // Cuisine match score (40% weight)
+      let matchDetails = [];
+
+      // Base score from rating (30 points max)
+      const ratingScore = (restaurant.rating / 5) * 30;
+      score += ratingScore;
+      if (restaurant.rating >= 4.5) {
+        matchDetails.push(`⭐ Highly rated ${restaurant.rating}/5`);
+      }
+
+      // Price range match (20 points)
+      if (priceRange && restaurant.priceRange === priceRange) {
+        score += 30;
+        matchDetails.push(`💰 Matches your price preference (${restaurant.priceRange})`);
+      }
+
+      // Cuisine match (30 points max)
       if (cuisinePreferences.length > 0) {
-        const cuisineMatchCount = restaurant.cuisine.filter(c => 
-          cuisinePreferences.includes(c)).length;
-        score += (cuisineMatchCount / cuisinePreferences.length) * 40;
-      } else {
-        score += 40; // Give full score if no preferences specified
+        const matches = restaurant.cuisineTypes
+          .filter(c => cuisinePreferences.includes(c.toLowerCase()));
+        
+        if (matches.length > 0) {
+          score += 40;  // Big boost for cuisine match
+          matchDetails.push(`🍝 ${matches.join(', ')} Restaurant`);
+        }
       }
 
-      // Feature match score (30% weight)
-      if (features.length > 0) {
-        const featureMatchCount = restaurant.features.filter(f => 
-          features.includes(f)).length;
-        score += (featureMatchCount / features.length) * 30;
-      } else {
-        score += 30; // Give full score if no features specified
+      // Currently open bonus (10 points)
+      if (restaurant.isOpenNow) {
+        score += 10;
+        matchDetails.push('✅ Currently open');
       }
 
-      // Rating score (20% weight)
-      if (restaurant.rating) {
-        score += (restaurant.rating / 5) * 20;
+      // Add distance scoring (max 20 points for closest restaurants)
+      const distance = calculateDistance(location, restaurant.location.coordinates);
+      const distanceScore = Math.max(0, 20 - (distance * 2)); // Lose 2 points per km
+      score += distanceScore;
+      
+      if (distance < 1) {
+        matchDetails.push(`📍 Very close (${distance.toFixed(1)} km)`);
+      } else if (distance < 3) {
+        matchDetails.push(`📍 Nearby (${distance.toFixed(1)} km)`);
       }
 
-      // Ambiance match score (10% weight)
-      if (ambiance.length > 0 && restaurant.ambiance) {
-        const ambianceMatchCount = restaurant.ambiance.filter(a => 
-          ambiance.includes(a)).length;
-        score += (ambianceMatchCount / ambiance.length) * 10;
-      } else {
-        score += 10; // Give full score if no ambiance specified
+      if (restaurant.cuisineTypes.includes('Italian')) {
+        score += 40; // Give big boost to Italian places
+        matchDetails.push('🍝 Authentic Italian Restaurant');
       }
 
       return {
-        ...restaurant.toObject(),
-        matchScore: Math.round(score)
+        ...restaurant,
+        distance: distance.toFixed(1),
+        matchScore: Math.round(score),
+        matchDetails
       };
     });
 
@@ -210,14 +131,76 @@ export const getRecommendations = async (req, res) => {
       .sort((a, b) => b.matchScore - a.matchScore)
       .slice(0, 10);
 
+    // Return enhanced restaurant details
     res.json({
       count: recommendations.length,
-      recommendations
+      recommendations: recommendations.map(r => ({
+        name: r.name,
+        rating: r.rating,
+        reviewCount: r.reviewCount,
+        priceRange: r.priceRange,
+        address: r.address,
+        distance: r.distance,
+        isOpenNow: r.isOpenNow,
+        phone: r.phone,
+        website: r.website,
+        openingHours: r.openingHours,
+        photos: r.photos,
+        cuisineTypes: r.cuisineTypes,
+        matchScore: r.matchScore,
+        matchDetails: r.matchDetails,
+        features: r.features,
+        reviews: r.reviews?.map(review => ({
+          rating: review.rating,
+          text: review.text,
+          time: review.time
+        }))
+      }))
     });
 
   } catch (error) {
-    console.error('❌ Recommendation Error:', error);
-    res.status(500).json({ error: error.message });
+    console.error('🚨 Error:', error);
+    res.status(500).json({ 
+      error: 'Failed to fetch recommendations',
+      details: error.message 
+    });
+  }
+};
+
+export const getPersonalizedRecommendations = async (req, res) => {
+  try {
+    const userPreferences = req.body;
+    console.log('📨 Received preferences:', userPreferences);
+
+    // Get restaurants from Google Places
+    const restaurants = await fetchNearbyRestaurants({
+      lat: parseFloat(userPreferences.location.lat),
+      lng: parseFloat(userPreferences.location.lng)
+    }, {
+      cuisinePreferences: userPreferences.cuisineTypes
+    });
+
+    // Get AI recommendations
+    const aiSuggestions = await getAIRecommendations(
+      restaurants,
+      userPreferences
+    );
+
+    // Return both restaurant data and AI suggestions
+    res.json({
+      restaurants: {
+        count: restaurants.length,
+        results: restaurants
+      },
+      aiRecommendations: aiSuggestions
+    });
+
+  } catch (error) {
+    console.error('🚨 Error:', error);
+    res.status(500).json({ 
+      error: 'Failed to get recommendations',
+      details: error.message 
+    });
   }
 };
   

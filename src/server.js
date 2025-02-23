@@ -3,6 +3,8 @@ import cors from 'cors';
 import morgan from 'morgan';
 import mongoose from 'mongoose';
 import connectDB from './db.js';
+import dotenv from 'dotenv';
+dotenv.config();
 
 import userRoutes from './routes/userRoutes.js';
 import eventRoutes from './routes/eventRoutes.js';
