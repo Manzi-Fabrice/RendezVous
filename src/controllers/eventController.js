@@ -3,13 +3,24 @@ import User from '../models/User.js';
 
 // Get all events
 export const getEvents = async (req, res) => {
+  console.log('✅ Inside getEvents controller');
+
   try {
     const events = await Event.find().populate('createdBy participants');
+
+    console.log('✅ MongoDB Response:', JSON.stringify(events, null, 2)); // Log data retrieved
+
+    if (!events || events.length === 0) {
+      console.warn('⚠ No events found in the database!');
+    }
+
     res.json(events);
   } catch (error) {
+    console.error('❌ Error fetching events:', error);
     res.status(500).json({ error: 'Failed to fetch events' });
   }
 };
+
 
 // Create new event
 export const createEvent = async (req, res) => {
