@@ -9,7 +9,7 @@ function EventsList() {
   const userId = users.length > 0 ? users[0]._id : null;
 
   useEffect(() => {
-    fetch('https://project-api-sustainable-waste.onrender.com/api/events')
+    fetch('https://project-api-sustainable-waste-bk6m.onrender.com/api/events')
       .then((res) => res.json())
       .then((data) => setEvents(data));
   }, []);

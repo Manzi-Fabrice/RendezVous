@@ -1,11 +1,15 @@
 import { create } from 'zustand';
-import { fetchUsers } from './api';
+import api from './api';
 
 const useUserStore = create((set) => ({
   users: [],
   loadUsers: async () => {
-    const users = await fetchUsers();
-    set({ users });
+    try {
+      const users = await api.getUsers();
+      set({ users });
+    } catch (error) {
+      console.error('Failed to load users:', error);
+    }
   },
 }));
 

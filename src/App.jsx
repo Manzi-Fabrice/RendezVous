@@ -4,6 +4,7 @@ import Home from './components/home';
 import EventsList from './components/EventsList';
 import CreateUser from './components/CreateUser';
 import ActivitiesList from './components/ActivitiesList';
+import RestaurantFinder from './components/RestuarantFinder';
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
       <CreateUser />
       <EventsList />
       <ActivitiesList />
+      <RestaurantFinder />
     </div>
   );
 }

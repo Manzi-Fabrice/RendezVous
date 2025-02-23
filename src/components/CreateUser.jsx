@@ -7,7 +7,7 @@ function CreateUser() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('https://project-api-sustainable-waste.onrender.com/api/users', {
+      const response = await fetch('https://project-api-sustainable-waste-bk6m.onrender.com/api/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
