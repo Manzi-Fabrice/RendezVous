@@ -2,7 +2,7 @@ import React from 'react';
 import {
   BrowserRouter as Router, Routes, Route, Link,
 } from 'react-router-dom';
-import Header from './components/Header';
+import Header from './components/header';
 import Home from './components/home';
 import EventsList from './components/EventsList';
 import FindRestaurant from './components/FindRestaurant';
