@@ -1,25 +1,17 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import PlanDateStep1 from './PlanDateStep1';
+import PlanDateStep2 from './PlanDateStep2';
+
+const Stack = createNativeStackNavigator();
 
 const AddDateScreen = () => {
   return (
-    <View style={styles.container}>
-      <Text style={styles.text}>Add Date Screen</Text>
-    </View>
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="PlanDateStep1" component={PlanDateStep1} />
+      <Stack.Screen name="PlanDateStep2" component={PlanDateStep2} />
+    </Stack.Navigator>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#FFF',
-  },
-  text: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-});
 
 export default AddDateScreen;
