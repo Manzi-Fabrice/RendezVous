@@ -42,6 +42,20 @@ app.get('/', (req, res) => {
   res.send('API is running...');
 });
 
+// Log available routes
+app.get('/api/routes', (req, res) => {
+  const routes = [];
+  app._router.stack.forEach((middleware) => {
+    if (middleware.route) {
+      routes.push({
+        path: middleware.route.path,
+        methods: Object.keys(middleware.route.methods)
+      });
+    }
+  });
+  res.json(routes);
+});
+
 app.use((err, req, res, next) => {
   console.error('❌ Error:', err);
   res.status(500).json({ error: err.message });

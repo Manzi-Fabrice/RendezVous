@@ -1,91 +1,226 @@
-import OpenAI from 'openai';
+import fetch from 'node-fetch';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
+export async function getAIRecommendations(restaurants, preferences) {
+  console.log('🔍 Input to AI:', {
+    restaurants: restaurants.length,
+    preferences: preferences
+  });
 
-export async function getAIRecommendations(restaurants, userPreferences) {
   try {
-    console.log('🤖 Calling OpenAI with preferences:', userPreferences);
-    
-    const messages = [
-      {
-        role: "system",
-        content: `You are an expert restaurant concierge who specializes in personalized recommendations. 
-        Consider atmosphere, price, location, and reviews when making suggestions.
-        Format your response with clear sections:
-        1. Top Recommendations (2-3 best matches)
-        2. Why These Restaurants Match
-        3. Additional Suggestions for Different Occasions`
-      },
-      {
-        role: "user",
-        content: `Given a user looking for:
-        - Cuisine: ${userPreferences.cuisineTypes.join(', ')}
-        - Vibe: ${userPreferences.vibePreferences.join(', ')}
-        - Occasion: ${userPreferences.occasion}
-        - Dietary needs: ${userPreferences.dietaryRestrictions.join(', ')}
-        
-        Analyze these restaurants and suggest the best matches:
-        ${JSON.stringify(restaurants, null, 2)}`
+    // Add default values
+    const defaultPreferences = {
+      cuisinePreferences: [],
+      dietaryRestrictions: [],
+      priceRangePreference: [],
+      vibePreferences: [],
+      minimumRating: 3.5,
+      searchRadius: 5000,
+      locationPreferences: {
+        maxDistance: 10,
+        preferredNeighborhoods: [],
+        transitPreferred: false,
+        requireParking: false,
+        requireAccessibility: false
       }
-    ];
+    };
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages,
-      temperature: 0.7, // Add some creativity
-      max_tokens: 1000, // Longer response
-      presence_penalty: 0.6, // Encourage diverse suggestions
-      frequency_penalty: 0.6 // Avoid repetitive language
+    const safePreferences = {
+      ...defaultPreferences,
+      ...preferences,
+      locationPreferences: {
+        ...defaultPreferences.locationPreferences,
+        ...preferences?.locationPreferences
+      }
+    };
+
+    // Simplify the restaurant data for the AI
+    const simplifiedRestaurants = restaurants.map(r => ({
+      name: r.name,
+      rating: r.rating,
+      priceRange: r.priceRange,
+      features: r.features,
+      cuisineTypes: r.cuisineTypes,
+      distance: r.distance.text,
+      isOpenNow: r.isOpenNow,
+      reviewCount: r.reviewCount
+    }));
+
+    const prompt = `Analyze these restaurants and provide EXACTLY 3 recommendations in this format:
+
+    1. TOP RECOMMENDATIONS (exactly 3 lines starting with -)
+    - [Name] - [Price] - [Features] - [Distance]
+    - [Name] - [Price] - [Features] - [Distance]
+    - [Name] - [Price] - [Features] - [Distance]
+
+    2. MATCH EXPLANATIONS (exactly 3 lines starting with -)
+    - [First restaurant explanation]
+    - [Second restaurant explanation]
+    - [Third restaurant explanation]
+
+    3. ADDITIONAL SUGGESTIONS (exactly 3 lines starting with -)
+    - Best time to visit: [suggestion]
+    - Alternative options: [2-3 other restaurants]
+    - Special tips: [relevant advice]
+
+    Restaurants to analyze:
+    ${JSON.stringify(simplifiedRestaurants, null, 2)}
+
+    User preferences:
+    - Atmosphere: ${safePreferences.vibePreferences?.join(', ') || 'Any'} 
+    - Price: ${safePreferences.priceRangePreference.join(' to ') || 'Any'}
+    - Rating: ${safePreferences.minimumRating}+
+    - Distance: ${safePreferences.locationPreferences.maxDistance}km max`;
+
+    // Add detailed logging
+    console.log('Deepseek API Request:', {
+      prompt: prompt,
+      restaurants: simplifiedRestaurants.length,
+      preferences: {
+        vibe: safePreferences.vibePreferences,
+        price: safePreferences.priceRangePreference,
+        rating: safePreferences.minimumRating
+      }
     });
 
-    console.log('✨ OpenAI Response:', completion.choices[0].message.content);
+    const response = await fetch('https://api.deepseek.com/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer sk-8c2b7011a2e44205b98a07cd4ff7f1dc`
+      },
+      body: JSON.stringify({
+        model: 'deepseek-chat',
+        messages: [
+          { 
+            role: 'system', 
+            content: 'You are a restaurant recommendation expert focused on fine dining experiences.' 
+          },
+          { role: 'user', content: prompt }
+        ],
+        temperature: 0.7,  // Add some creativity
+        max_tokens: 1000,  // Allow longer responses
+        stream: false,
+        timeout: 30000
+      })
+    });
 
-    // Parse and structure the response
-    const aiSuggestions = {
-      topPicks: [],
-      explanations: {},
-      additionalSuggestions: []
-    };
+    // Log full response
+    console.log('Deepseek Response Status:', response.status);
+    const responseText = await response.text();
+    console.log('Deepseek Raw Response:', responseText);
 
-    // Parse AI response into structured format
-    const response = completion.choices[0].message.content;
-
-    // Parse the sections from AI response
-    try {
-      // Split response
-      const sections = response.split(/\d+\./);
-      
-      // Parse top 
-      aiSuggestions.topPicks = sections[1]
-        ?.trim()
-        .split('\n')
-        .filter(line => line.length > 0);
-
-      // Parse explanations
-      aiSuggestions.explanations = sections[2]
-        ?.trim()
-        .split('\n')
-        .filter(line => line.length > 0);
-
-      // Parse additional suggestions
-      aiSuggestions.additionalSuggestions = sections[3]
-        ?.trim()
-        .split('\n')
-        .filter(line => line.length > 0);
-
-      return aiSuggestions;
-    } catch (parseError) {
-      console.error('Error parsing AI response:', parseError);
-      // Return raw response as fallback
-      return { rawResponse: response };
+    if (!response.ok) {
+      console.log('Deepseek API error:', response.status, responseText);
+      return getSmartFallbackRecommendations(restaurants, preferences);
     }
+
+    try {
+      const data = JSON.parse(responseText);
+      console.log('Deepseek Response Content:', data.choices[0].message.content);
+
+      // Split on double newlines to better handle the format
+      const content = data.choices[0].message.content;
+      const sections = content.split(/\d+\.\s+/);  // Split on "1. ", "2. ", etc.
+
+      // Clean up the sections
+      return {
+        topPicks: sections[1]?.trim()
+          .split('\n')
+          .map(line => line.trim())
+          .filter(line => line.startsWith('-')),
+        explanations: sections[2]?.trim()
+          .split('\n')
+          .map(line => line.trim())
+          .filter(line => line.startsWith('-')),
+        additionalSuggestions: sections[3]?.trim()
+          .split('\n')
+          .map(line => line.trim())
+          .filter(line => line.startsWith('-'))
+      };
+    } catch (parseError) {
+      console.log('Error parsing Deepseek response:', parseError);
+      return getSmartFallbackRecommendations(restaurants, preferences);
+    }
+
   } catch (error) {
-    console.error('OpenAI API Error:', error);
-    return {
-      error: 'Failed to get AI recommendations',
-      details: error.message
-    };
+    console.error('AI Recommendation Error:', error);
+    return getSmartFallbackRecommendations(restaurants, preferences);
   }
+}
+
+function getSmartFallbackRecommendations(restaurants, preferences) {
+  const scoredRestaurants = restaurants.map(restaurant => {
+    let score = 0;
+
+    // Vibe/atmosphere match (for fine dining)
+    if (preferences.vibePreferences?.includes('fine dining')) {
+      if (restaurant.features.includes('Fine Dining')) {
+        score += 5;
+      }
+      if (restaurant.priceRange === '$$$') {
+        score += 3;
+      }
+    }
+
+    // Rating score (weighted more for fine dining)
+    score += restaurant.rating * (preferences.vibePreferences?.includes('fine dining') ? 3 : 2);
+
+    // Price match
+    if (preferences.priceRangePreference?.includes(restaurant.priceRange)) {
+      score += 3;
+    }
+
+    // Distance score
+    const distanceScore = 5 - (restaurant.distance.value / 1);
+    score += Math.max(0, distanceScore);
+
+    return { ...restaurant, score };
+  });
+
+  // Sort by score and get top 3
+  const topThree = scoredRestaurants
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 3);
+
+  return {
+    topPicks: topThree.map(r => 
+      `- ${r.name} - ${r.priceRange} - ${r.features.join(', ')} - ${r.distance.text}`
+    ),
+    explanations: topThree.map(r => 
+      `- ${r.name} matches with ${r.rating}/5 rating, ${r.priceRange} price range, and ${r.distance.text} distance`
+    ),
+    additionalSuggestions: [
+      `- Best time to visit: ${getVisitTimeSuggestion(topThree[0])}`,
+      `- Alternative options: ${getAlternatives(restaurants, topThree)}`,
+      `- Special tips: ${getSpecialTips(topThree[0])}`
+    ]
+  };
+}
+
+// Helper functions
+function getVisitTimeSuggestion(restaurant) {
+  if (restaurant.priceRange === '$$$') {
+    return 'Dinner hours (6-9pm) for best atmosphere';
+  }
+  return 'Lunch hours (11:30am-2pm) for better value';
+}
+
+function getAlternatives(allRestaurants, topPicks) {
+  const alternatives = allRestaurants
+    .filter(r => !topPicks.find(t => t.name === r.name))
+    .filter(r => r.rating >= 4.0)
+    .slice(0, 2)
+    .map(r => r.name)
+    .join(' or ');
+  return alternatives || 'No similar alternatives found';
+}
+
+function getSpecialTips(restaurant) {
+  if (restaurant.features.includes('Fine Dining')) {
+    return 'Reservations recommended';
+  }
+  if (restaurant.features.includes('Well Rated')) {
+    return 'Popular spot, might have wait times during peak hours';
+  }
+  return 'Call ahead to check current wait times';
 } 

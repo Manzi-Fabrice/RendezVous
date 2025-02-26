@@ -1,26 +1,64 @@
 import { Client } from "@googlemaps/google-maps-services-js";
 import dotenv from 'dotenv';
+import { calculateDistance } from '../utils/distance.js';
 dotenv.config();
 
 const client = new Client({});
 
-export async function fetchNearbyRestaurants(location, options = {}) {
+export async function fetchNearbyRestaurants(location, preferences) {
   try {
-    console.log('🔍 Calling Google Places API with:', { location, options });
+    console.log('🔍 Searching with preferences:', preferences);
     
-    const response = await client.placesNearby({
-      params: {
-        location,
-        radius: options.radius || 5000,
-        type: 'restaurant',
-        keyword: options.cuisinePreferences 
-          ? `${options.cuisinePreferences.join(' ')} restaurant` 
-          : 'restaurant',
-        minprice: 1,
-        maxprice: 4,
-        key: process.env.GOOGLE_MAPS_API_KEY
+    const params = {
+      location,
+      radius: preferences.searchRadius || 5000,
+      type: 'restaurant',
+      minprice: preferences.priceRangePreference?.length ? 
+        Math.min(...preferences.priceRangePreference.map(p => p.length)) : 0,
+      maxprice: preferences.priceRangePreference?.length ?
+        Math.max(...preferences.priceRangePreference.map(p => p.length)) : 4,
+      keyword: preferences.cuisinePreferences?.length ?
+        `${preferences.cuisinePreferences.join('|')} restaurant` : 'restaurant',
+      key: process.env.GOOGLE_MAPS_API_KEY,
+      rankby: preferences.rankByDistance ? 'distance' : undefined,
+      opennow: preferences.openNow || undefined
+    };
+
+    // Enhanced feature extraction
+    function extractFeatures(place) {
+      const features = [];
+      
+      // Price level features
+      if (place.price_level) {
+        features.push(`Price: ${place.price_level}`);
       }
+
+      // Rating-based features
+      if (place.rating >= 4.5) features.push('Top Rated');
+      else if (place.rating >= 4.0) features.push('Well Rated');
+
+      // Dietary features from place details
+      if (place.types.includes('halal')) features.push('Halal');
+      if (place.types.includes('kosher')) features.push('Kosher');
+      if (place.types.includes('vegetarian')) features.push('Vegetarian-Friendly');
+
+      // Vibe features
+      if (place.price_level >= 3) features.push('Fine Dining');
+      if (place.types.includes('family_restaurant')) features.push('Family-Friendly');
+      if (place.types.includes('bar')) features.push('Bar Available');
+      if (place.outdoor_seating) features.push('Outdoor Seating');
+
+      return features;
+    }
+
+    // Log the search parameters
+    console.log('Search params:', params);
+
+    const response = await client.placesNearby({
+      params: params
     });
+
+    console.log('Found restaurants:', response.data.results.length);
 
     // Get detailed information for each restaurant
     const detailedRestaurants = await Promise.all(
@@ -31,6 +69,11 @@ export async function fetchNearbyRestaurants(location, options = {}) {
         )
         .map(async place => {
           const details = await getPlaceDetails(place.place_id);
+          const distance = calculateDistance(location, {
+            lat: place.geometry.location.lat,
+            lng: place.geometry.location.lng
+          });
+
           return {
             name: place.name,
             rating: place.rating,
@@ -48,9 +91,7 @@ export async function fetchNearbyRestaurants(location, options = {}) {
             },
             features: extractFeatures(place),
             cuisineTypes: [
-              // Add cuisine from name if it matches
-              ...(place.name.toLowerCase().includes('italian') ? ['Italian'] : []),
-              // Add cuisine from types
+              ...(place.name.toLowerCase().includes('india') ? ['Indian'] : []),
               ...place.types
                 .filter(type => {
                   const cleanType = type.toLowerCase().replace('_restaurant', '');
@@ -62,49 +103,34 @@ export async function fetchNearbyRestaurants(location, options = {}) {
                 })
                 .filter(Boolean)
             ],
-            // Add new details
             phone: details?.formatted_phone_number || null,
             website: details?.website || null,
             openingHours: details?.opening_hours?.weekday_text || null,
             reviews: details?.reviews?.slice(0, 3) || [],
             priceLevel: details?.price_level,
-            businessStatus: place.business_status
+            businessStatus: place.business_status,
+            distance: {
+              value: distance,
+              text: `${distance.toFixed(1)} km`
+            },
+            neighborhood: details?.address_components?.find(c => 
+              c.types.includes('neighborhood'))?.long_name,
+            transitOptions: details?.transit_options || [],
+            parkingAvailable: details?.parking || false,
+            accessibility: details?.wheelchair_accessible || false
           };
         })
     );
 
-    return detailedRestaurants;
+    // Sort by preference
+    return detailedRestaurants.sort((a, b) => {
+      if (preferences.rankByDistance) return a.distance.value - b.distance.value;
+      return b.rating - a.rating;
+    });
   } catch (error) {
     console.error('❌ Google Places API Error:', error.response?.data || error.message);
     throw error;
   }
-}
-
-// Helper function to extract features from place data
-function extractFeatures(place) {
-  const features = [];
-  
-  if (place.price_level >= 3) features.push('Fine Dining');
-  if (place.opening_hours?.open_now) features.push('Open Now');
-  if (place.rating >= 4.5) features.push('Highly Rated');
-  
-  const typeToFeature = {
-    'meal_takeaway': 'Takeout',
-    'meal_delivery': 'Delivery',
-    'family_restaurant': 'Family-Friendly',
-    'pizza': 'Pizza',
-    'pasta': 'Pasta',
-    'wine_bar': 'Wine Bar',
-    'cafe': 'Café'
-  };
-
-  place.types.forEach(type => {
-    if (typeToFeature[type]) {
-      features.push(typeToFeature[type]);
-    }
-  });
-
-  return features;
 }
 
 // Get additional details for a specific restaurant
@@ -121,7 +147,11 @@ export async function getPlaceDetails(placeId) {
           'reviews',
           'price_level',
           'formatted_address',
-          'url'  // Google Maps link
+          'url',  // Google Maps link
+          'address_components',
+          'transit_options',
+          'parking',
+          'wheelchair_accessible'
         ]
       }
     });
@@ -147,6 +177,11 @@ const cuisineMapping = {
   'thai_restaurant': 'Thai',
   'mexican': 'Mexican',
   'mexican_restaurant': 'Mexican',
+  'indian': 'Indian',
+  'indian_restaurant': 'Indian',
+  'curry': 'Indian',
+  'south_indian': 'Indian',
+  'north_indian': 'Indian',
   // ... other cuisines
 };
 
