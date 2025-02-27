@@ -19,6 +19,7 @@ export default StyleSheet.create({
     textAlign: 'center',
     marginTop: 80,
     color: '#333',
+    marginBottom: 20,
   },
   nextButton: {
     backgroundColor: '#E3C16F',

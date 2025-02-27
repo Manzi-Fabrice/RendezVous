@@ -21,7 +21,10 @@ const PlanDateStep2 = () => {
   return (
     <View style={styles.container}>
       {/* Back Button */}
-      <TouchableOpacity onPress={() => navigation.navigate('PlanDateStep1')} style={styles.backButton}>
+      <TouchableOpacity
+        onPress={() => navigation.navigate('PlanDateStep1', { isGoingBack: true })}
+        style={styles.backButton}
+      >
         <Ionicons name="arrow-back" size={24} color="black" />
       </TouchableOpacity>
 
@@ -33,37 +36,34 @@ const PlanDateStep2 = () => {
 
       {/* Date Type Selection */}
       <View style={step2Styles.bubbleContainer}>
-  {dateTypes.map((type) => (
-    <TouchableOpacity
-      key={type}
-      style={[step2Styles.bubble, selectedType === type && step2Styles.selectedBubble]}
-      onPress={() => setSelectedType(type)}
-    >
-      <Text style={[step2Styles.bubbleText, selectedType === type && step2Styles.selectedText]}>
-        {type}
-      </Text>
-    </TouchableOpacity>
-  ))}
-</View>
-
+        {dateTypes.map((type) => (
+          <TouchableOpacity
+            key={type}
+            style={[step2Styles.bubble, selectedType === type && step2Styles.selectedBubble]}
+            onPress={() => setSelectedType(type)}
+          >
+            <Text style={[step2Styles.bubbleText, selectedType === type && step2Styles.selectedText]}>
+              {type}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
 
       {/* New Question: How many people are you inviting? */}
       <Text style={step2Styles.questionText}>How many people are you inviting to the date?</Text>
       
       <DropDownPicker
-  open={open}
-  value={selectedPeople}
-  items={items}
-  setOpen={setOpen}
-  setValue={setSelectedPeople}
-  setItems={setItems}
-  placeholder="Select number of people"
-  containerStyle={step2Styles.dropdownContainer}
-  style={step2Styles.picker}
-  dropDownContainerStyle={[step2Styles.dropDownBox, { height: open ? 90 : 0 }]} // Ensures only 2 items are visible
-/>
-
-
+        open={open}
+        value={selectedPeople}
+        items={items}
+        setOpen={setOpen}
+        setValue={setSelectedPeople}
+        setItems={setItems}
+        placeholder="Select number of people"
+        containerStyle={step2Styles.dropdownContainer}
+        style={step2Styles.picker}
+        dropDownContainerStyle={[step2Styles.dropDownBox, { height: open ? 90 : 0 }]} // Ensures only 2 items are visible
+      />
 
       {/* Next Button */}
       <TouchableOpacity onPress={() => navigation.navigate('PlanDateStep3')} style={styles.nextButton}>
@@ -82,12 +82,13 @@ const PlanDateStep2 = () => {
 
 export default PlanDateStep2;
 
+// 🔹 Screen-Specific Styles for Step 2
 const step2Styles = StyleSheet.create({
   questionText: {
     fontSize: 18,
     textAlign: 'center',
-    marginTop: 50,
-    marginBottom: 20,
+    marginTop: 30,
+    marginBottom: 30,
     color: '#666',
   },
   bubbleContainer: {
@@ -104,9 +105,7 @@ const step2Styles = StyleSheet.create({
     margin: 5,
   },
   selectedBubble: {
-    backgroundColor: '#E6D6F2', // Keeps the original color
-    borderWidth: 2, // Adds a highlight effect
-    borderColor: 'rgba(106, 13, 173, 0.6)', // Purple border
+    backgroundColor: '#6A0DAD', // Matches the selected style from screen 3
     opacity: 0.9, // Slight transparency
   },
   bubbleText: {
@@ -115,7 +114,7 @@ const step2Styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   selectedText: {
-    color: '#4A0072', // Darker purple to show selection
+    color: '#FFF', // White text for contrast
   },
   dropdownContainer: {
     width: '80%',

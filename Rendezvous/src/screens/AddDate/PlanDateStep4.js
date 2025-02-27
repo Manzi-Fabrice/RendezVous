@@ -1,0 +1,121 @@
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
+import styles from './styles';
+import { StyleSheet } from 'react-native';
+
+const PlanDateStep4 = () => {
+  const navigation = useNavigation();
+  
+  // Restaurant Type Selection
+  const [selectedType, setSelectedType] = useState(null);
+  const restaurantTypes = [
+    'Fast Food', 'Casual Dining', 'Fine Dining', 'Café',
+    'Buffet', 'Vegan', 'Seafood', 'Steakhouse', 'Dessert'
+  ];
+
+  // Cuisine Type Selection
+  const [selectedCuisine, setSelectedCuisine] = useState(null);
+  const cuisineTypes = [
+    'Jamaican', 'Mexican', 'Italian', 'Chinese',
+    'Japanese', 'Indian', 'French', 'Mediterranean', 'Thai'
+  ];
+
+  return (
+    <View style={styles.container}>
+      {/* Back Button */}
+      <TouchableOpacity
+        onPress={() => navigation.navigate('PlanDateStep3', { isGoingBack: true })}
+        style={styles.backButton}
+      >
+        <Ionicons name="arrow-back" size={24} color="black" />
+      </TouchableOpacity>
+
+      {/* Header */}
+      <Text style={styles.headerText}>Let’s plan your date</Text>
+
+      {/* Restaurant Type Selection */}
+      <Text style={step4Styles.questionText}>What type of restaurant are you looking for?</Text>
+      <View style={step4Styles.bubbleContainer}>
+        {restaurantTypes.map((type) => (
+          <TouchableOpacity
+            key={type}
+            style={[step4Styles.bubble, selectedType === type && step4Styles.selectedBubble]}
+            onPress={() => setSelectedType(type)}
+          >
+            <Text style={[step4Styles.bubbleText, selectedType === type && step4Styles.selectedText]}>
+              {type}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      {/* Cuisine Selection */}
+      <Text style={step4Styles.questionText}>What type of cuisine would you like?</Text>
+      <View style={step4Styles.bubbleContainer}>
+        {cuisineTypes.map((cuisine) => (
+          <TouchableOpacity
+            key={cuisine}
+            style={[step4Styles.bubble, selectedCuisine === cuisine && step4Styles.selectedBubble]}
+            onPress={() => setSelectedCuisine(cuisine)}
+          >
+            <Text style={[step4Styles.bubbleText, selectedCuisine === cuisine && step4Styles.selectedText]}>
+              {cuisine}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      {/* Next Button */}
+      <TouchableOpacity onPress={() => navigation.navigate('PlanDateStep5')} style={styles.nextButton}>
+        <Text style={styles.nextButtonText}>Next</Text>
+      </TouchableOpacity>
+
+      {/* Pagination Dots */}
+      <View style={styles.paginationContainer}>
+        {[...Array(5)].map((_, index) => (
+          <View key={index} style={[styles.paginationDot, index === 3 && styles.activeDot]} />
+        ))}
+      </View>
+    </View>
+  );
+};
+
+export default PlanDateStep4;
+
+// 🔹 Screen-Specific Styles for Step 4
+const step4Styles = StyleSheet.create({
+  questionText: {
+    fontSize: 18,
+    textAlign: 'center',
+    marginTop: 20,
+    marginBottom: 20,
+    color: '#666',
+  },
+  bubbleContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  bubble: {
+    backgroundColor: '#E6D6F2',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    margin: 5,
+  },
+  selectedBubble: {
+    backgroundColor: '#6A0DAD', // Matches the selected style from screen 3
+    opacity: 0.9, // Slight transparency
+  },
+  bubbleText: {
+    fontSize: 16,
+    color: '#6A0DAD',
+    fontWeight: 'bold',
+  },
+  selectedText: {
+    color: '#FFF', // White text for contrast
+  },
+});

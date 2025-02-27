@@ -6,11 +6,16 @@ import { Ionicons } from '@expo/vector-icons';
 import styles from './styles';
 import { StyleSheet } from 'react-native';
 
-
 const PlanDateStep1 = () => {
   const navigation = useNavigation();
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState({ hour: '10', minute: '00', period: 'AM' });
+
+  // Get today's date in YYYY-MM-DD format
+  const today = new Date().toISOString().split('T')[0];
+
+  // Check if the selected date is valid (today or future)
+  const isDateValid = selectedDate && selectedDate >= today;
 
   return (
     <View style={styles.container}>
@@ -32,6 +37,7 @@ const PlanDateStep1 = () => {
           markedDates={{
             [selectedDate]: { selected: true, selectedColor: '#0066FF' },
           }}
+          minDate={today} // Prevents past date selection
           theme={{
             todayTextColor: '#6A0DAD',
             arrowColor: '#6A0DAD',
@@ -64,7 +70,11 @@ const PlanDateStep1 = () => {
       </View>
 
       {/* Next Button */}
-      <TouchableOpacity onPress={() => navigation.navigate('PlanDateStep2')} style={styles.nextButton}>
+      <TouchableOpacity
+        onPress={() => isDateValid && navigation.navigate('PlanDateStep2')}
+        style={[styles.nextButton, !isDateValid && step1Styles.disabledButton]} // Disable styling
+        disabled={!isDateValid} // Disable if no valid date selected
+      >
         <Text style={styles.nextButtonText}>Next</Text>
       </TouchableOpacity>
 
@@ -85,7 +95,7 @@ const step1Styles = StyleSheet.create({
   questionText: {
     fontSize: 18,
     textAlign: 'center',
-    marginTop: 50,
+    marginTop: 30,
     marginBottom: 10,
     color: '#666',
   },
@@ -118,5 +128,8 @@ const step1Styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     marginHorizontal: 5,
+  },
+  disabledButton: {
+    backgroundColor: '#ddd', 
   },
 });
