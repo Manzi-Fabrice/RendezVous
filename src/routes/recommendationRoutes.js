@@ -51,9 +51,14 @@ router.get('/test', (req, res) => {
 router.post('/test/places', async (req, res) => {
   try {
     console.log('Testing Google Places API with params:', req.body);
+    // Build a preferences object that includes restaurantName if provided
+    const preferences = {
+      restaurantName: req.body.restaurantName, // This will be used in fetchNearbyRestaurants
+      cuisinePreferences: req.body.cuisineTypes || ['italian']
+    };
     const restaurants = await fetchNearbyRestaurants(
       req.body.location || { lat: 40.7128, lng: -74.0060 },
-      { cuisinePreferences: req.body.cuisineTypes || ['italian'] }
+      preferences
     );
     res.json({
       count: restaurants.length,
@@ -64,6 +69,7 @@ router.post('/test/places', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
 
 // Test OpenAI
 router.post('/test/ai', async (req, res) => {
@@ -89,7 +95,7 @@ router.post('/test/ai', async (req, res) => {
         features: ["Wine Bar", "Private Dining"]
       }
     ];
-    
+
     const aiSuggestions = await getAIRecommendations(
       sampleRestaurants,
       req.body

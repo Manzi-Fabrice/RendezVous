@@ -7,28 +7,26 @@ const connectDB = async () => {
   try {
     console.log('Attempting to connect to MongoDB...');
     console.log('URI:', mongoURI);
-    
+
     await mongoose.connect(mongoURI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
       dbName: 'Cluster0' // Explicitly set database name
     });
-    
+
     console.log(`✅ MongoDB Connected Successfully!`);
     console.log(`📌 Using database: ${mongoose.connection.db.databaseName}`);
-    
+
     // Test direct connection
     const db = mongoose.connection.db;
     const collections = await db.listCollections().toArray();
     console.log('Collections:', collections.map(c => c.name));
-    
+
     // Test restaurant collection
     const count = await db.collection('restaurants').countDocuments();
     console.log(`Found ${count} restaurants in database`);
-    
+
     const sample = await db.collection('restaurants').findOne();
     console.log('Sample restaurant:', sample);
-    
+
   } catch (error) {
     console.error('❌ MongoDB Connection Error:', error.message);
     console.error('Full error:', error);
