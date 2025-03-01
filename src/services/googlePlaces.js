@@ -1,33 +1,49 @@
-import { Client } from "@googlemaps/google-maps-services-js";
+
 import dotenv from 'dotenv';
+import path from 'path';
+import { Client } from "@googlemaps/google-maps-services-js";
 import { calculateDistance } from '../utils/distance.js';
-dotenv.config();
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+
 
 const client = new Client({});
+
 
 export async function fetchNearbyRestaurants(location, preferences) {
   try {
     console.log('🔍 Searching with preferences:', preferences);
-    
+
     const params = {
       location,
       radius: preferences.searchRadius || 5000,
       type: 'restaurant',
-      minprice: preferences.priceRangePreference?.length ? 
+      minprice: preferences.priceRangePreference?.length ?
         Math.min(...preferences.priceRangePreference.map(p => p.length)) : 0,
       maxprice: preferences.priceRangePreference?.length ?
         Math.max(...preferences.priceRangePreference.map(p => p.length)) : 4,
-      keyword: preferences.cuisinePreferences?.length ?
-        `${preferences.cuisinePreferences.join('|')} restaurant` : 'restaurant',
+      keyword: (!preferences.restaurantName && preferences.cuisinePreferences?.length)
+        ? `${preferences.cuisinePreferences.join('|')} restaurant`
+        : 'restaurant',
       key: process.env.GOOGLE_MAPS_API_KEY,
       rankby: preferences.rankByDistance ? 'distance' : undefined,
       opennow: preferences.openNow || undefined
     };
 
+    if (preferences.restaurantName) {
+      params.name = preferences.restaurantName;
+      delete params.keyword;
+    }
+
+
     // Enhanced feature extraction
     function extractFeatures(place) {
       const features = [];
-      
+
       // Price level features
       if (place.price_level) {
         features.push(`Price: ${place.price_level}`);
@@ -63,8 +79,8 @@ export async function fetchNearbyRestaurants(location, preferences) {
     // Get detailed information for each restaurant
     const detailedRestaurants = await Promise.all(
       response.data.results
-        .filter(place => 
-          place.types.includes('restaurant') && 
+        .filter(place =>
+          place.types.includes('restaurant') &&
           !place.types.includes('lodging')  // Exclude hotels
         )
         .map(async place => {
@@ -113,7 +129,7 @@ export async function fetchNearbyRestaurants(location, preferences) {
               value: distance,
               text: `${distance.toFixed(1)} km`
             },
-            neighborhood: details?.address_components?.find(c => 
+            neighborhood: details?.address_components?.find(c =>
               c.types.includes('neighborhood'))?.long_name,
             transitOptions: details?.transit_options || [],
             parkingAvailable: details?.parking || false,
@@ -206,4 +222,4 @@ const italianTypes = [
   'osteria',
   'pizzeria',
   'pasta'
-]; 
+];
