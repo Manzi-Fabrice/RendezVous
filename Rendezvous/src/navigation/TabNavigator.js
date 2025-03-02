@@ -4,9 +4,9 @@ import { Ionicons } from 'react-native-vector-icons';
 
 // Import empty screens
 import HomeScreen from '../screens/Home/HomeScreen';
-import SearchScreen from '../screens/Search/SearchScreen';
 import AddDateScreen from '../screens/AddDate/AddDateScreen';
 import ProfileScreen from '../screens/Profile/ProfileScreen';
+import SearchStackNavigator from './SearchStackNavigator';
 
 const Tab = createBottomTabNavigator();
 
@@ -35,7 +35,7 @@ const TabNavigator = () => {
       })}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Search" component={SearchScreen} />
+      <Tab.Screen name="Search" component={SearchStackNavigator} />
       <Tab.Screen name="Add Date" component={AddDateScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
