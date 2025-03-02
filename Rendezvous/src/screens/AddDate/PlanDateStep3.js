@@ -29,16 +29,18 @@ const PlanDateStep3 = () => {
     setDistance((prev) => (prev > 1 ? prev - 1 : prev)); // Min 1
   };
 
+  // Check if Next button should be enabled
+  const isNextDisabled = !location || !selectedTransport;
+
   return (
     <View style={styles.container}>
       {/* Back Button */}
       <TouchableOpacity
-  onPress={() => navigation.navigate('PlanDateStep2', { isGoingBack: true })}
-  style={styles.backButton}
->
-  <Ionicons name="arrow-back" size={24} color="black" />
-</TouchableOpacity>
-
+        onPress={() => navigation.navigate('PlanDateStep2', { isGoingBack: true })}
+        style={styles.backButton}
+      >
+        <Ionicons name="arrow-back" size={24} color="black" />
+      </TouchableOpacity>
 
       {/* Header */}
       <Text style={styles.headerText}>Let’s plan your date</Text>
@@ -94,8 +96,12 @@ const PlanDateStep3 = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Next Button */}
-      <TouchableOpacity onPress={() => navigation.navigate('PlanDateStep4')} style={styles.nextButton}>
+      {/* Next Button (Disabled until selection is made) */}
+      <TouchableOpacity
+        onPress={() => navigation.navigate('PlanDateStep4')}
+        style={[styles.nextButton, isNextDisabled && step3Styles.disabledButton]}
+        disabled={isNextDisabled}
+      >
         <Text style={styles.nextButtonText}>Next</Text>
       </TouchableOpacity>
 
@@ -167,7 +173,6 @@ const step3Styles = StyleSheet.create({
     padding: 10,
     borderRadius: 10,
     marginHorizontal: 5,
-
   },
   distanceText: {
     fontSize: 18,
@@ -185,5 +190,8 @@ const step3Styles = StyleSheet.create({
     color: '#FFF',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  disabledButton: {
+    backgroundColor: '#ddd', // Greyed-out button
   },
 });

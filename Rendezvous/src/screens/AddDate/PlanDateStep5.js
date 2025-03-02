@@ -1,29 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import styles from './styles';
 import { StyleSheet } from 'react-native';
 
 const PlanDateStep5 = () => {
   const navigation = useNavigation();
-  
-  // Budget Selection
-  const [selectedBudget, setSelectedBudget] = useState(null);
+  const route = useRoute();
+
+  // Retrieve previous selections from route params (if available)
+  const [selectedBudget, setSelectedBudget] = useState(route.params?.selectedBudget || null);
+  const [selectedRestrictions, setSelectedRestrictions] = useState(route.params?.selectedRestrictions || []);
+
   const budgetOptions = ['$','$$','$$$','$$$$'];
+  const dietaryRestrictions = ['Halal', 'Kosher', 'Vegetarian', 'Vegan', 'Gluten-Free', 'Dairy-Free'];
 
-  // Date Duration Selection
-  const [selectedDuration, setSelectedDuration] = useState(null);
-  const durationOptions = ['30 min', '1 hour', '2 hours', '3+ hours'];
-
-  // Allergy-Free Option
-  const [allergyFree, setAllergyFree] = useState(false);
+  // Toggle selection for dietary restrictions
+  const toggleRestriction = (restriction) => {
+    setSelectedRestrictions((prev) =>
+      prev.includes(restriction)
+        ? prev.filter((r) => r !== restriction)
+        : [...prev, restriction]
+    );
+  };
 
   return (
     <View style={styles.container}>
       {/* Back Button */}
       <TouchableOpacity
-        onPress={() => navigation.navigate('PlanDateStep4', { isGoingBack: true })}
+        onPress={() => navigation.navigate('PlanDateStep4', { 
+          isGoingBack: true,
+          selectedBudget,
+          selectedRestrictions
+        })}
         style={styles.backButton}
       >
         <Ionicons name="arrow-back" size={24} color="black" />
@@ -48,40 +58,36 @@ const PlanDateStep5 = () => {
         ))}
       </View>
 
-      {/* Date Duration Selection */}
-      <Text style={step5Styles.questionText}>How long do you want the date to last?</Text>
+      {/* Dietary Restrictions Selection */}
+      <Text style={step5Styles.questionText}>Do you have any dietary restrictions?</Text>
       <View style={step5Styles.bubbleContainer}>
-        {durationOptions.map((duration) => (
+        {dietaryRestrictions.map((restriction) => (
           <TouchableOpacity
-            key={duration}
-            style={[step5Styles.bubble, selectedDuration === duration && step5Styles.selectedBubble]}
-            onPress={() => setSelectedDuration(duration)}
+            key={restriction}
+            style={[
+              step5Styles.bubble,
+              selectedRestrictions.includes(restriction) && step5Styles.selectedBubble
+            ]}
+            onPress={() => toggleRestriction(restriction)}
           >
-            <Text style={[step5Styles.bubbleText, selectedDuration === duration && step5Styles.selectedText]}>
-              {duration}
+            <Text style={[
+              step5Styles.bubbleText,
+              selectedRestrictions.includes(restriction) && step5Styles.selectedText
+            ]}>
+              {restriction}
             </Text>
           </TouchableOpacity>
         ))}
       </View>
 
-      {/* Allergy-Free Option */}
-      <Text style={step5Styles.questionText}>Do you want an allergy-free restaurant?</Text>
-      <TouchableOpacity
-        style={[
-          step5Styles.allergyToggle,
-          { backgroundColor: allergyFree ? '#6A0DAD' : '#ddd' },
-        ]}
-        onPress={() => setAllergyFree(!allergyFree)}
-      >
-        <Text style={step5Styles.allergyToggleText}>
-          {allergyFree ? 'Yes' : 'No'}
-        </Text>
-      </TouchableOpacity>
+      {/* Request a Date Button */}
+      <TouchableOpacity 
+  onPress={() => navigation.navigate('ConnectWithDate')} 
+  style={styles.requestButton}
+>
+  <Text style={styles.requestButtonText}>Request a Date</Text>
+</TouchableOpacity>
 
-      {/* Next Button */}
-      <TouchableOpacity onPress={() => navigation.navigate('PlanDateSummary')} style={styles.nextButton}>
-        <Text style={styles.nextButtonText}>Next</Text>
-      </TouchableOpacity>
 
       {/* Pagination Dots */}
       <View style={styles.paginationContainer}>
@@ -118,7 +124,7 @@ const step5Styles = StyleSheet.create({
     margin: 5,
   },
   selectedBubble: {
-    backgroundColor: '#6A0DAD', // Matches the selected style from screen 3
+    backgroundColor: '#6A0DAD', // Matches selected style from screen 3
     opacity: 0.9, // Slight transparency
   },
   bubbleText: {
@@ -129,15 +135,16 @@ const step5Styles = StyleSheet.create({
   selectedText: {
     color: '#FFF', // White text for contrast
   },
-  allergyToggle: {
-    alignSelf: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
+  requestButton: {
+    backgroundColor: '#6A0DAD',
+    padding: 15,
     borderRadius: 10,
-    marginBottom: 70,
+    alignItems: 'center',
+    marginHorizontal: 40,
+    marginBottom: 50,
   },
-  allergyToggleText: {
-    fontSize: 16,
+  requestButtonText: {
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#FFF',
   },

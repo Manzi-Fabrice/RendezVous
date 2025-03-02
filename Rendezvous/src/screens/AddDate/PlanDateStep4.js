@@ -1,32 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import styles from './styles';
 import { StyleSheet } from 'react-native';
 
 const PlanDateStep4 = () => {
   const navigation = useNavigation();
-  
-  // Restaurant Type Selection
-  const [selectedType, setSelectedType] = useState(null);
+  const route = useRoute();
+
+  // Retrieve previous selections from route params (if available)
+  const [selectedType, setSelectedType] = useState(route.params?.selectedType || null);
+  const [selectedCuisine, setSelectedCuisine] = useState(route.params?.selectedCuisine || null);
+
   const restaurantTypes = [
     'Fast Food', 'Casual Dining', 'Fine Dining', 'Café',
     'Buffet', 'Vegan', 'Seafood', 'Steakhouse', 'Dessert'
   ];
 
-  // Cuisine Type Selection
-  const [selectedCuisine, setSelectedCuisine] = useState(null);
   const cuisineTypes = [
     'Jamaican', 'Mexican', 'Italian', 'Chinese',
     'Japanese', 'Indian', 'French', 'Mediterranean', 'Thai'
   ];
 
+  // Check if all required selections are made
+  const isNextDisabled = !(selectedType && selectedCuisine);
+
   return (
     <View style={styles.container}>
       {/* Back Button */}
       <TouchableOpacity
-        onPress={() => navigation.navigate('PlanDateStep3', { isGoingBack: true })}
+        onPress={() => navigation.navigate('PlanDateStep3', { 
+          isGoingBack: true,
+          selectedType,  // Passing selections back
+          selectedCuisine
+        })}
         style={styles.backButton}
       >
         <Ionicons name="arrow-back" size={24} color="black" />
@@ -68,7 +76,14 @@ const PlanDateStep4 = () => {
       </View>
 
       {/* Next Button */}
-      <TouchableOpacity onPress={() => navigation.navigate('PlanDateStep5')} style={styles.nextButton}>
+      <TouchableOpacity
+        onPress={() => navigation.navigate('PlanDateStep5', {
+          selectedType,
+          selectedCuisine
+        })}
+        style={[styles.nextButton, isNextDisabled && step4Styles.disabledButton]} // Disable styling
+        disabled={isNextDisabled} // Disable if selections are not made
+      >
         <Text style={styles.nextButtonText}>Next</Text>
       </TouchableOpacity>
 
@@ -117,5 +132,8 @@ const step4Styles = StyleSheet.create({
   },
   selectedText: {
     color: '#FFF', // White text for contrast
+  },
+  disabledButton: {
+    backgroundColor: '#ddd', // Greyed out button when not enabled
   },
 });
