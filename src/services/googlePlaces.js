@@ -20,19 +20,14 @@ export async function fetchNearbyRestaurants(location, preferences) {
 
     const params = {
       location,
-      radius: preferences.searchRadius || 5000,
+      radius: maxDistance * 1000, // Convert km to meters
       type: 'restaurant',
-      minprice: preferences.priceRangePreference?.length ?
-        Math.min(...preferences.priceRangePreference.map(p => p.length)) : 0,
-      maxprice: preferences.priceRangePreference?.length ?
-        Math.max(...preferences.priceRangePreference.map(p => p.length)) : 4,
-      keyword: (!preferences.restaurantName && preferences.cuisinePreferences?.length)
-        ? `${preferences.cuisinePreferences.join('|')} restaurant`
-        : 'restaurant',
+      keyword: restaurantType ? `${restaurantType} restaurant` : cuisine || 'restaurant',
+      minprice: budget ? budget.length : 0,
+      maxprice: budget ? budget.length : 4,
       key: process.env.GOOGLE_MAPS_API_KEY,
-      rankby: preferences.rankByDistance ? 'distance' : undefined,
-      opennow: preferences.openNow || undefined
     };
+    
 
     if (preferences.restaurantName) {
       params.name = preferences.restaurantName;

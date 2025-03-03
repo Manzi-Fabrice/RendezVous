@@ -6,75 +6,111 @@ import { getAIRecommendations } from '../services/openai.js';
 
 const router = express.Router();
 
-// Add this test route
+/**
+ * ✅ Test route to create a restaurant in the database
+ */
 router.post('/test-restaurant', async (req, res) => {
   try {
     console.log('Creating test restaurant with data:', req.body);
     const restaurant = new Restaurant(req.body);
     const saved = await restaurant.save();
-    console.log('Created restaurant:', saved);
+    console.log('✅ Created restaurant:', saved);
     res.json(saved);
   } catch (error) {
-    console.error('Error creating restaurant:', error);
+    console.error('❌ Error creating restaurant:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// Update to use the new recommendations function
+/**
+ * ✅ Get restaurant recommendations (Standard API)
+ */
 router.get('/restaurants', getRecommendations);
+
+/**
+ * ✅ Personalized recommendations route (Full DateContext)
+ */
 router.post('/personalized', async (req, res) => {
   try {
-    // 1. First gets real restaurants from Google
-    const restaurants = await fetchNearbyRestaurants(
-      req.body.location,
-      { cuisinePreferences: req.body.cuisineTypes }
-    );
+    const {
+      date,
+      time,
+      type,
+      people,
+      location,
+      transport,
+      maxDistance,
+      restaurantType,
+      cuisine,
+      budget,
+      dietaryRestrictions
+    } = req.body;
 
-    // 2. Then sends these real restaurants to AI for analysis
-    const aiSuggestions = await getAIRecommendations(
-      restaurants,  // Real restaurant data from Google
-      req.body     // User preferences
-    );
+    console.log('📨 Received full date plan:', req.body);
 
-    res.json(aiSuggestions);
+    // Fetch restaurants based on user filters
+    const restaurants = await fetchNearbyRestaurants(location, {
+      maxDistance,
+      priceRangePreference: budget ? [budget] : [],
+      cuisinePreferences: cuisine ? [cuisine] : [],
+      restaurantType: restaurantType ? [restaurantType] : [],
+      dietaryRestrictions: dietaryRestrictions || [],
+    });
+
+    // AI recommendations should consider time, event type, and group size
+    const aiRecommendations = await getAIRecommendations(restaurants, {
+      date,
+      time,
+      type,
+      people,
+      cuisine,
+      transport
+    });
+
+    res.json({
+      restaurants: { count: restaurants.length, results: restaurants },
+      aiRecommendations
+    });
+
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('🚨 Error:', error);
+    res.status(500).json({ error: 'Failed to get recommendations', details: error.message });
   }
 });
 
-// Simple test route
-router.get('/test', (req, res) => {
-  res.json({ message: 'Recommendation routes working' });
-});
-
-// Test Google Places
+/**
+ * ✅ Test Google Places API with user-provided parameters
+ */
 router.post('/test/places', async (req, res) => {
   try {
-    console.log('Testing Google Places API with params:', req.body);
-    // Build a preferences object that includes restaurantName if provided
+    console.log('🔍 Testing Google Places API with params:', req.body);
+    
+    const { location, restaurantName, cuisineTypes } = req.body;
     const preferences = {
-      restaurantName: req.body.restaurantName, // This will be used in fetchNearbyRestaurants
-      cuisinePreferences: req.body.cuisineTypes || ['italian']
+      restaurantName: restaurantName || '', // Use user input or empty string
+      cuisinePreferences: cuisineTypes || ['italian']
     };
-    const restaurants = await fetchNearbyRestaurants(
-      req.body.location || { lat: 40.7128, lng: -74.0060 },
-      preferences
-    );
+
+    const restaurants = await fetchNearbyRestaurants(location || { lat: 40.7128, lng: -74.0060 }, preferences);
+
     res.json({
       count: restaurants.length,
       results: restaurants
     });
+
   } catch (error) {
-    console.error('Google Places Error:', error);
+    console.error('❌ Google Places Error:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-
-// Test OpenAI
+/**
+ * ✅ Test AI-based recommendations
+ */
 router.post('/test/ai', async (req, res) => {
   try {
-    console.log('Testing OpenAI with sample data');
+    console.log('🤖 Testing OpenAI with sample data');
+
     const sampleRestaurants = [
       {
         name: "Bella Italia",
@@ -96,51 +132,44 @@ router.post('/test/ai', async (req, res) => {
       }
     ];
 
-    const aiSuggestions = await getAIRecommendations(
-      sampleRestaurants,
-      req.body
-    );
+    const aiSuggestions = await getAIRecommendations(sampleRestaurants, req.body);
+
     res.json(aiSuggestions);
+
   } catch (error) {
-    console.error('Test AI Error:', error);
+    console.error('❌ Test AI Error:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
+/**
+ * ✅ Compare Google Places API results with AI-enhanced recommendations
+ */
 router.post('/test/comparison', async (req, res) => {
   try {
-    // 1. Get base restaurants from Google using provided location
+    console.log('🆚 Comparing Google Places results with AI recommendations');
+
     const googleResults = await fetchNearbyRestaurants(
-      req.body.location || {
-        lat: 43.7044,  // Dartmouth coordinates as fallback
-        lng: -72.2887
-      },
-      {
-        cuisinePreferences: req.body.cuisineTypes
-      }
+      req.body.location || { lat: 43.7044, lng: -72.2887 },
+      { cuisinePreferences: req.body.cuisineTypes }
     );
 
-    // 2. Get AI enhanced recommendations
-    const aiResults = await getAIRecommendations(
-      googleResults,
-      req.body
-    );
+    const aiResults = await getAIRecommendations(googleResults, req.body);
 
     res.json({
-      googlePlaces: {
-        count: googleResults.length,
-        results: googleResults
-      },
+      googlePlaces: { count: googleResults.length, results: googleResults },
       aiEnhanced: aiResults
     });
+
   } catch (error) {
+    console.error('❌ Comparison Error:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-const simplePrompt = "Tell me about Italian cuisine.";
-
-// Add a simple test endpoint
+/**
+ * ✅ Test DeepSeek API (Placeholder)
+ */
 router.get('/test/deepseek', async (req, res) => {
   try {
     const response = await fetch('https://api.deepseek.com/chat/completions', {
@@ -151,33 +180,27 @@ router.get('/test/deepseek', async (req, res) => {
       },
       body: JSON.stringify({
         model: 'deepseek-chat',
-        messages: [
-          { role: 'user', content: 'Say hello!' }
-        ],
+        messages: [{ role: 'user', content: 'Say hello!' }],
         stream: false
       })
     });
 
     const data = await response.json();
-    console.log('Test Response:', {
-      status: response.status,
-      headers: response.headers,
-      data: data
-    });
+    console.log('📝 DeepSeek Test Response:', data);
 
-    res.json({
-      success: response.ok,
-      status: response.status,
-      data: data
-    });
+    res.json({ success: response.ok, status: response.status, data: data });
+
   } catch (error) {
-    console.error('Test Error:', error);
-    res.status(500).json({
-      success: false,
-      error: error.message,
-      details: error
-    });
+    console.error('❌ DeepSeek Test Error:', error);
+    res.status(500).json({ success: false, error: error.message, details: error });
   }
+});
+
+/**
+ * ✅ Simple test endpoint to verify the API is running
+ */
+router.get('/test', (req, res) => {
+  res.json({ message: '✅ Recommendation routes working!' });
 });
 
 export default router;
