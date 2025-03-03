@@ -1,21 +1,21 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import { useDateContext } from '../context/DateContext'; // Import context
 import styles from './styles';
 import { StyleSheet } from 'react-native';
 
 const PlanDateStep1 = () => {
   const navigation = useNavigation();
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [selectedTime, setSelectedTime] = useState({ hour: '10', minute: '00', period: 'AM' });
+  const { datePlan, updateDatePlan } = useDateContext(); // Get context values
 
   // Get today's date in YYYY-MM-DD format
   const today = new Date().toISOString().split('T')[0];
 
   // Check if the selected date is valid (today or future)
-  const isDateValid = selectedDate && selectedDate >= today;
+  const isDateValid = datePlan.date && datePlan.date >= today;
 
   return (
     <View style={styles.container}>
@@ -33,9 +33,9 @@ const PlanDateStep1 = () => {
       {/* Calendar */}
       <View style={step1Styles.calendarContainer}>
         <Calendar
-          onDayPress={(day) => setSelectedDate(day.dateString)}
+          onDayPress={(day) => updateDatePlan('date', day.dateString)}
           markedDates={{
-            [selectedDate]: { selected: true, selectedColor: '#0066FF' },
+            [datePlan.date]: { selected: true, selectedColor: '#0066FF' },
           }}
           minDate={today} // Prevents past date selection
           theme={{
@@ -49,23 +49,38 @@ const PlanDateStep1 = () => {
       {/* Time Selector */}
       <View style={step1Styles.timeSelector}>
         <TouchableOpacity
-          onPress={() => setSelectedTime({ ...selectedTime, hour: selectedTime.hour === '12' ? '01' : String(Number(selectedTime.hour) + 1).padStart(2, '0') })}
+          onPress={() =>
+            updateDatePlan('time', {
+              ...datePlan.time,
+              hour: datePlan.time?.hour === '12' ? '01' : String(Number(datePlan.time?.hour || '10') + 1).padStart(2, '0')
+            })
+          }
           style={step1Styles.timeBox}
         >
-          <Text style={step1Styles.timeText}>{selectedTime.hour}</Text>
+          <Text style={step1Styles.timeText}>{datePlan.time?.hour || '10'}</Text>
         </TouchableOpacity>
         <Text style={step1Styles.colon}>:</Text>
         <TouchableOpacity
-          onPress={() => setSelectedTime({ ...selectedTime, minute: selectedTime.minute === '45' ? '00' : String(Number(selectedTime.minute) + 15).padStart(2, '0') })}
+          onPress={() =>
+            updateDatePlan('time', {
+              ...datePlan.time,
+              minute: datePlan.time?.minute === '45' ? '00' : String(Number(datePlan.time?.minute || '00') + 15).padStart(2, '0')
+            })
+          }
           style={step1Styles.timeBox}
         >
-          <Text style={step1Styles.timeText}>{selectedTime.minute}</Text>
+          <Text style={step1Styles.timeText}>{datePlan.time?.minute || '00'}</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={() => setSelectedTime({ ...selectedTime, period: selectedTime.period === 'AM' ? 'PM' : 'AM' })}
+          onPress={() =>
+            updateDatePlan('time', {
+              ...datePlan.time,
+              period: datePlan.time?.period === 'AM' ? 'PM' : 'AM'
+            })
+          }
           style={step1Styles.timeBox}
         >
-          <Text style={step1Styles.timeText}>{selectedTime.period}</Text>
+          <Text style={step1Styles.timeText}>{datePlan.time?.period || 'AM'}</Text>
         </TouchableOpacity>
       </View>
 
@@ -130,6 +145,6 @@ const step1Styles = StyleSheet.create({
     marginHorizontal: 5,
   },
   disabledButton: {
-    backgroundColor: '#ddd', 
+    backgroundColor: '#ddd',
   },
 });

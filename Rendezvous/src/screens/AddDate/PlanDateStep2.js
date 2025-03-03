@@ -1,26 +1,25 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import DropDownPicker from 'react-native-dropdown-picker';
+import { useDateContext } from '../context/DateContext'; // Import DateContext
 import styles from './styles';
 import { StyleSheet } from 'react-native';
 
 const PlanDateStep2 = () => {
   const navigation = useNavigation();
-  const [selectedType, setSelectedType] = useState(null);
-  const [open, setOpen] = useState(false);
-  const [selectedPeople, setSelectedPeople] = useState(null);
-
-  const [items, setItems] = useState([...Array(10).keys()].map((num) => ({
-    label: String(num + 1),
-    value: String(num + 1),
-  })).concat([{ label: 'More than 10', value: 'More than 10' }]));
+  const { datePlan, updateDatePlan } = useDateContext(); // Get context values
+  const [open, setOpen] = React.useState(false);
 
   const dateTypes = ['Couples Date', 'Friend Date', 'Family Date', 'Kids Date', 'Casual Meetup', 'Business Meetup'];
+  const items = [...Array(10).keys()].map((num) => ({
+    label: String(num + 1),
+    value: String(num + 1),
+  })).concat([{ label: 'More than 10', value: 'More than 10' }]);
 
   // Check if all required fields are filled
-  const isNextDisabled = !(selectedType && selectedPeople);
+  const isNextDisabled = !(datePlan.type && datePlan.people);
 
   return (
     <View style={styles.container}>
@@ -43,10 +42,10 @@ const PlanDateStep2 = () => {
         {dateTypes.map((type) => (
           <TouchableOpacity
             key={type}
-            style={[step2Styles.bubble, selectedType === type && step2Styles.selectedBubble]}
-            onPress={() => setSelectedType(type)}
+            style={[step2Styles.bubble, datePlan.type === type && step2Styles.selectedBubble]}
+            onPress={() => updateDatePlan('type', type)}
           >
-            <Text style={[step2Styles.bubbleText, selectedType === type && step2Styles.selectedText]}>
+            <Text style={[step2Styles.bubbleText, datePlan.type === type && step2Styles.selectedText]}>
               {type}
             </Text>
           </TouchableOpacity>
@@ -58,11 +57,11 @@ const PlanDateStep2 = () => {
 
       <DropDownPicker
         open={open}
-        value={selectedPeople}
+        value={datePlan.people}
         items={items}
         setOpen={setOpen}
-        setValue={setSelectedPeople}
-        setItems={setItems}
+        setValue={(val) => updateDatePlan('people', val)}
+        setItems={() => {}}
         placeholder="Select number of people"
         containerStyle={step2Styles.dropdownContainer}
         style={step2Styles.picker}

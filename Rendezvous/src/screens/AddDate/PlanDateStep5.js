@@ -1,39 +1,63 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import { useDateContext } from '../context/DateContext'; // Import DateContext
 import styles from './styles';
 import { StyleSheet } from 'react-native';
 
 const PlanDateStep5 = () => {
   const navigation = useNavigation();
-  const route = useRoute();
-
-  // Retrieve previous selections from route params (if available)
-  const [selectedBudget, setSelectedBudget] = useState(route.params?.selectedBudget || null);
-  const [selectedRestrictions, setSelectedRestrictions] = useState(route.params?.selectedRestrictions || []);
+  const { datePlan, updateDatePlan } = useDateContext();
 
   const budgetOptions = ['$','$$','$$$','$$$$'];
   const dietaryRestrictions = ['Halal', 'Kosher', 'Vegetarian', 'Vegan', 'Gluten-Free', 'Dairy-Free'];
 
   // Toggle selection for dietary restrictions
   const toggleRestriction = (restriction) => {
-    setSelectedRestrictions((prev) =>
-      prev.includes(restriction)
-        ? prev.filter((r) => r !== restriction)
-        : [...prev, restriction]
-    );
+    const updatedRestrictions = datePlan.dietaryRestrictions.includes(restriction)
+      ? datePlan.dietaryRestrictions.filter((r) => r !== restriction)
+      : [...datePlan.dietaryRestrictions, restriction];
+    updateDatePlan('dietaryRestrictions', updatedRestrictions);
   };
+
+  const sendDataToAI = async () => {
+    try {
+      const response = await fetch(
+        'https://project-api-sustainable-waste.onrender.com/api/recommendations/test/places',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            date: datePlan.date, // 📅 Selected date
+            time: datePlan.time, // ⏰ Preferred time
+            type: datePlan.type, // 👫 Type (Couple, Friends, etc.)
+            people: datePlan.people, // 👥 Number of people
+            location: datePlan.location, // 📍 User's location
+            transport: datePlan.transport, // 🚗 Transportation mode
+            maxDistance: datePlan.maxDistance, // 📏 Max travel distance
+            restaurantType: datePlan.restaurantType, // 🍽️ Dining type
+            cuisine: datePlan.cuisine, // 🍜 Preferred cuisine
+            budget: datePlan.budget, // 💰 Price range
+            dietaryRestrictions: datePlan.dietaryRestrictions, // 🥦 Dietary restrictions
+          })
+        }
+      );
+  
+      const data = await response.json();
+      navigation.navigate('RecommendedDetails', { recommendations: data });
+  
+    } catch (error) {
+      console.error('Error sending data to AI:', error);
+    }
+  };
+  
 
   return (
     <View style={styles.container}>
       {/* Back Button */}
       <TouchableOpacity
-        onPress={() => navigation.navigate('PlanDateStep4', { 
-          isGoingBack: true,
-          selectedBudget,
-          selectedRestrictions
-        })}
+        onPress={() => navigation.navigate('PlanDateStep4')}
         style={styles.backButton}
       >
         <Ionicons name="arrow-back" size={24} color="black" />
@@ -48,10 +72,10 @@ const PlanDateStep5 = () => {
         {budgetOptions.map((option) => (
           <TouchableOpacity
             key={option}
-            style={[step5Styles.bubble, selectedBudget === option && step5Styles.selectedBubble]}
-            onPress={() => setSelectedBudget(option)}
+            style={[step5Styles.bubble, datePlan.budget === option && step5Styles.selectedBubble]}
+            onPress={() => updateDatePlan('budget', option)}
           >
-            <Text style={[step5Styles.bubbleText, selectedBudget === option && step5Styles.selectedText]}>
+            <Text style={[step5Styles.bubbleText, datePlan.budget === option && step5Styles.selectedText]}>
               {option}
             </Text>
           </TouchableOpacity>
@@ -64,34 +88,24 @@ const PlanDateStep5 = () => {
         {dietaryRestrictions.map((restriction) => (
           <TouchableOpacity
             key={restriction}
-            style={[
-              step5Styles.bubble,
-              selectedRestrictions.includes(restriction) && step5Styles.selectedBubble
-            ]}
+            style={[step5Styles.bubble, datePlan.dietaryRestrictions.includes(restriction) && step5Styles.selectedBubble]}
             onPress={() => toggleRestriction(restriction)}
           >
-            <Text style={[
-              step5Styles.bubbleText,
-              selectedRestrictions.includes(restriction) && step5Styles.selectedText
-            ]}>
+            <Text style={[step5Styles.bubbleText, datePlan.dietaryRestrictions.includes(restriction) && step5Styles.selectedText]}>
               {restriction}
             </Text>
           </TouchableOpacity>
         ))}
       </View>
 
-      {/* Request a Date Button */}
-      <TouchableOpacity 
-  onPress={() => navigation.navigate('ConnectWithDate')} 
-  style={styles.requestButton}
->
-  <Text style={styles.requestButtonText}>Request a Date</Text>
-</TouchableOpacity>
-
+      {/* Recommend Date Button */}
+      <TouchableOpacity onPress={sendDataToAI} style={styles.nextButton}>
+        <Text style={styles.nextButtonText}>Recommend Date</Text>
+      </TouchableOpacity>
 
       {/* Pagination Dots */}
       <View style={styles.paginationContainer}>
-        {[...Array(6)].map((_, index) => (
+        {[...Array(5)].map((_, index) => (
           <View key={index} style={[styles.paginationDot, index === 4 && styles.activeDot]} />
         ))}
       </View>
@@ -124,8 +138,8 @@ const step5Styles = StyleSheet.create({
     margin: 5,
   },
   selectedBubble: {
-    backgroundColor: '#6A0DAD', // Matches selected style from screen 3
-    opacity: 0.9, // Slight transparency
+    backgroundColor: '#6A0DAD',
+    opacity: 0.9,
   },
   bubbleText: {
     fontSize: 16,
@@ -133,19 +147,6 @@ const step5Styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   selectedText: {
-    color: '#FFF', // White text for contrast
-  },
-  requestButton: {
-    backgroundColor: '#6A0DAD',
-    padding: 15,
-    borderRadius: 10,
-    alignItems: 'center',
-    marginHorizontal: 40,
-    marginBottom: 50,
-  },
-  requestButtonText: {
-    fontSize: 18,
-    fontWeight: 'bold',
     color: '#FFF',
   },
 });

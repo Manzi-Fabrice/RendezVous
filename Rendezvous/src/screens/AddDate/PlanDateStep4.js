@@ -1,17 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import { useDateContext } from '../context/DateContext'; // Import DateContext
 import styles from './styles';
 import { StyleSheet } from 'react-native';
 
 const PlanDateStep4 = () => {
   const navigation = useNavigation();
-  const route = useRoute();
-
-  // Retrieve previous selections from route params (if available)
-  const [selectedType, setSelectedType] = useState(route.params?.selectedType || null);
-  const [selectedCuisine, setSelectedCuisine] = useState(route.params?.selectedCuisine || null);
+  const { datePlan, updateDatePlan } = useDateContext(); // Get context values
 
   const restaurantTypes = [
     'Fast Food', 'Casual Dining', 'Fine Dining', 'Café',
@@ -24,17 +21,13 @@ const PlanDateStep4 = () => {
   ];
 
   // Check if all required selections are made
-  const isNextDisabled = !(selectedType && selectedCuisine);
+  const isNextDisabled = !(datePlan.restaurantType && datePlan.cuisine);
 
   return (
     <View style={styles.container}>
       {/* Back Button */}
       <TouchableOpacity
-        onPress={() => navigation.navigate('PlanDateStep3', { 
-          isGoingBack: true,
-          selectedType,  // Passing selections back
-          selectedCuisine
-        })}
+        onPress={() => navigation.navigate('PlanDateStep3', { isGoingBack: true })}
         style={styles.backButton}
       >
         <Ionicons name="arrow-back" size={24} color="black" />
@@ -49,10 +42,10 @@ const PlanDateStep4 = () => {
         {restaurantTypes.map((type) => (
           <TouchableOpacity
             key={type}
-            style={[step4Styles.bubble, selectedType === type && step4Styles.selectedBubble]}
-            onPress={() => setSelectedType(type)}
+            style={[step4Styles.bubble, datePlan.restaurantType === type && step4Styles.selectedBubble]}
+            onPress={() => updateDatePlan('restaurantType', type)}
           >
-            <Text style={[step4Styles.bubbleText, selectedType === type && step4Styles.selectedText]}>
+            <Text style={[step4Styles.bubbleText, datePlan.restaurantType === type && step4Styles.selectedText]}>
               {type}
             </Text>
           </TouchableOpacity>
@@ -65,10 +58,10 @@ const PlanDateStep4 = () => {
         {cuisineTypes.map((cuisine) => (
           <TouchableOpacity
             key={cuisine}
-            style={[step4Styles.bubble, selectedCuisine === cuisine && step4Styles.selectedBubble]}
-            onPress={() => setSelectedCuisine(cuisine)}
+            style={[step4Styles.bubble, datePlan.cuisine === cuisine && step4Styles.selectedBubble]}
+            onPress={() => updateDatePlan('cuisine', cuisine)}
           >
-            <Text style={[step4Styles.bubbleText, selectedCuisine === cuisine && step4Styles.selectedText]}>
+            <Text style={[step4Styles.bubbleText, datePlan.cuisine === cuisine && step4Styles.selectedText]}>
               {cuisine}
             </Text>
           </TouchableOpacity>
@@ -77,10 +70,7 @@ const PlanDateStep4 = () => {
 
       {/* Next Button */}
       <TouchableOpacity
-        onPress={() => navigation.navigate('PlanDateStep5', {
-          selectedType,
-          selectedCuisine
-        })}
+        onPress={() => navigation.navigate('PlanDateStep5')}
         style={[styles.nextButton, isNextDisabled && step4Styles.disabledButton]} // Disable styling
         disabled={isNextDisabled} // Disable if selections are not made
       >

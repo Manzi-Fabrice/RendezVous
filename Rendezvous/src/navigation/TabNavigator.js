@@ -1,8 +1,10 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Ionicons } from 'react-native-vector-icons';
+import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { useDateContext } from '../screens/context/DateContext'; // Import DateContext
 
-// Import empty screens
+// Import screens
 import HomeScreen from '../screens/Home/HomeScreen';
 import AddDateScreen from '../screens/AddDate/AddDateScreen';
 import ProfileScreen from '../screens/Profile/ProfileScreen';
@@ -11,6 +13,9 @@ import SearchStackNavigator from './SearchStackNavigator';
 const Tab = createBottomTabNavigator();
 
 const TabNavigator = () => {
+  const navigation = useNavigation();
+  const { updateDatePlan } = useDateContext();
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -36,7 +41,32 @@ const TabNavigator = () => {
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Search" component={SearchStackNavigator} />
-      <Tab.Screen name="Add Date" component={AddDateScreen} />
+
+      {/* Reset Date Plan when clicking Add Date */}
+      <Tab.Screen
+        name="Add Date"
+        component={AddDateScreen}
+        listeners={{
+          tabPress: (e) => {
+            e.preventDefault(); // Prevent default navigation
+            updateDatePlan({
+              date: null,
+              time: null,
+              type: null,
+              people: null,
+              location: null,
+              transport: null,
+              maxDistance: 10, // Default distance
+              restaurantType: null,
+              cuisine: null,
+              budget: null,
+              dietaryRestrictions: [],
+            });
+            navigation.navigate('Add Date'); // Navigate after resetting
+          },
+        }}
+      />
+
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );

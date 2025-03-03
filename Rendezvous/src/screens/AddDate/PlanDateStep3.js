@@ -1,36 +1,34 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import { useDateContext } from '../context/DateContext'; // Import DateContext
 import styles from './styles';
 import { StyleSheet } from 'react-native';
 
 const PlanDateStep3 = () => {
   const navigation = useNavigation();
-  
-  // State for Location Input
-  const [location, setLocation] = useState('');
+  const { datePlan, updateDatePlan } = useDateContext(); // Get context values
 
-  // State for Transportation Dropdown
-  const [selectedTransport, setSelectedTransport] = useState(null);
   const transportOptions = ['Car', 'Bike', 'Public Transit', 'Walking'];
-
-  // State for Distance Stepper
-  const [distance, setDistance] = useState(1);
-  const [distanceUnit, setDistanceUnit] = useState('Miles');
 
   // Increase Distance
   const increaseDistance = () => {
-    setDistance((prev) => (prev < 50 ? prev + 1 : prev)); // Max 50
+    updateDatePlan('maxDistance', Math.min(datePlan.maxDistance + 1, 50));
   };
 
   // Decrease Distance
   const decreaseDistance = () => {
-    setDistance((prev) => (prev > 1 ? prev - 1 : prev)); // Min 1
+    updateDatePlan('maxDistance', Math.max(datePlan.maxDistance - 1, 1));
+  };
+
+  // Toggle Distance Unit
+  const toggleDistanceUnit = () => {
+    updateDatePlan('distanceUnit', datePlan.distanceUnit === 'Miles' ? 'KM' : 'Miles');
   };
 
   // Check if Next button should be enabled
-  const isNextDisabled = !location || !selectedTransport;
+  const isNextDisabled = !datePlan.location || !datePlan.transport;
 
   return (
     <View style={styles.container}>
@@ -51,8 +49,8 @@ const PlanDateStep3 = () => {
         style={step3Styles.input}
         placeholder="Enter your location"
         placeholderTextColor="#aaa"
-        value={location}
-        onChangeText={setLocation}
+        value={datePlan.location}
+        onChangeText={(text) => updateDatePlan('location', text)}
       />
 
       {/* Transportation Selection */}
@@ -61,10 +59,10 @@ const PlanDateStep3 = () => {
         {transportOptions.map((option) => (
           <TouchableOpacity
             key={option}
-            style={[step3Styles.transportButton, selectedTransport === option && step3Styles.selectedTransport]}
-            onPress={() => setSelectedTransport(option)}
+            style={[step3Styles.transportButton, datePlan.transport === option && step3Styles.selectedTransport]}
+            onPress={() => updateDatePlan('transport', option)}
           >
-            <Text style={[step3Styles.transportText, selectedTransport === option && step3Styles.selectedTransportText]}>
+            <Text style={[step3Styles.transportText, datePlan.transport === option && step3Styles.selectedTransportText]}>
               {option}
             </Text>
           </TouchableOpacity>
@@ -78,7 +76,7 @@ const PlanDateStep3 = () => {
           <Ionicons name="remove-outline" size={24} color="black" />
         </TouchableOpacity>
 
-        <Text style={step3Styles.distanceText}>{distance}</Text>
+        <Text style={step3Styles.distanceText}>{datePlan.maxDistance}</Text>
 
         <TouchableOpacity onPress={increaseDistance} style={step3Styles.stepperButton}>
           <Ionicons name="add-outline" size={24} color="black" />
@@ -88,11 +86,11 @@ const PlanDateStep3 = () => {
         <TouchableOpacity
           style={[
             step3Styles.unitToggle,
-            { backgroundColor: distanceUnit === 'Miles' ? '#6A0DAD' : '#ddd' },
+            { backgroundColor: datePlan.distanceUnit === 'Miles' ? '#6A0DAD' : '#ddd' },
           ]}
-          onPress={() => setDistanceUnit(distanceUnit === 'Miles' ? 'KM' : 'Miles')}
+          onPress={toggleDistanceUnit}
         >
-          <Text style={step3Styles.unitToggleText}>{distanceUnit}</Text>
+          <Text style={step3Styles.unitToggleText}>{datePlan.distanceUnit}</Text>
         </TouchableOpacity>
       </View>
 
@@ -116,6 +114,7 @@ const PlanDateStep3 = () => {
 };
 
 export default PlanDateStep3;
+
 
 // 🔹 Screen-Specific Styles for Step 3
 const step3Styles = StyleSheet.create({
