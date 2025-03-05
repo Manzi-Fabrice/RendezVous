@@ -19,27 +19,29 @@ export default function SearchScreen() {
 
   // Hard-coded location
   const userLocation = { lat: 40.7128, lng: -74.0060 };
+  const LOCAL_BACKEND_URL = 'http://localhost:9090';
+const fetchRestaurants = async () => {
+  try {
+    const response = await fetch(
+      `${LOCAL_BACKEND_URL}/api/recommendations/test/places`,
+      //'https://project-api-sustainable-waste.onrender.com/api/recommendations/test/places',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          location: userLocation,
+          restaurantName: searchText.trim() || '' // Send empty string if no input
+        })
+      }
+    );
+    const data = await response.json();
+    setRestaurants(data.results || []);
+    console.log('Restaurants from server:', data);
+  } catch (error) {
+    console.error('Error fetching restaurants:', error);
+  }
+};
 
-  const fetchRestaurants = async () => {
-    try {
-      const response = await fetch(
-        'https://project-api-sustainable-waste.onrender.com/api/recommendations/test/places',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            location: userLocation,
-            restaurantName: searchText.trim() || "Joe's Diner"
-          })
-        }
-      );
-      const data = await response.json();
-      setRestaurants(data.results || []);
-      console.log('Restaurants from server:', data);
-    } catch (error) {
-      console.error('Error fetching restaurants:', error);
-    }
-  };
 
   const renderRestaurant = ({ item }) => {
     const photoUrl = item.photos && item.photos[0] ? item.photos[0].url : null;

@@ -20,37 +20,43 @@ const PlanDateStep5 = () => {
       : [...datePlan.dietaryRestrictions, restriction];
     updateDatePlan('dietaryRestrictions', updatedRestrictions);
   };
-
   const sendDataToAI = async () => {
+    console.log('📊 Checking datePlan before sending:', JSON.stringify(datePlan, null, 2));
+  
+    if (!datePlan.maxDistance) {
+      console.error('🚨 Error: maxDistance is undefined');
+      return;
+    }
+    const LOCAL_BACKEND_URL = 'http://localhost:9090';
     try {
       const response = await fetch(
-        'https://project-api-sustainable-waste.onrender.com/api/recommendations/test/places',
+        `${LOCAL_BACKEND_URL}/api/recommendations/personalized`,
+        //'https://project-api-sustainable-waste.onrender.com/api/recommendations/personalized',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            date: datePlan.date, // 📅 Selected date
-            time: datePlan.time, // ⏰ Preferred time
-            type: datePlan.type, // 👫 Type (Couple, Friends, etc.)
-            people: datePlan.people, // 👥 Number of people
-            location: datePlan.location, // 📍 User's location
-            transport: datePlan.transport, // 🚗 Transportation mode
-            maxDistance: datePlan.maxDistance, // 📏 Max travel distance
-            restaurantType: datePlan.restaurantType, // 🍽️ Dining type
-            cuisine: datePlan.cuisine, // 🍜 Preferred cuisine
-            budget: datePlan.budget, // 💰 Price range
-            dietaryRestrictions: datePlan.dietaryRestrictions, // 🥦 Dietary restrictions
-          })
+            ...datePlan,
+            maxDistance: datePlan.maxDistance ?? 10,  // ✅ Ensure it is set
+          }),
         }
       );
   
       const data = await response.json();
-      navigation.navigate('RecommendedDetails', { recommendations: data });
+      console.log('✅ API Response:', data);
   
+      if (response.ok) {
+        navigation.navigate('RecommendedList', { recommendations: data });
+
+      } else {
+        console.error('❌ API Error:', data);
+      }
     } catch (error) {
-      console.error('Error sending data to AI:', error);
+      console.error('❌ Error sending data to AI:', error);
     }
   };
+  
+
   
 
   return (
