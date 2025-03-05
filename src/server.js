@@ -1,8 +1,9 @@
+// server.js
 import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import mongoose from 'mongoose';
-import connectDB from './db.js';
+import connectDB from './db.js'; // Ensure you have your DB connection file if needed
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -17,7 +18,7 @@ app.use(cors());
 app.use(morgan('dev'));
 app.use(express.json());
 
-// Log all incoming requests
+// Log all incoming requests (for debugging)
 app.use((req, res, next) => {
   console.log(`📨 ${req.method} ${req.url}`);
   console.log('Request Body:', req.body);
@@ -42,7 +43,7 @@ app.get('/', (req, res) => {
   res.send('API is running...');
 });
 
-// Log available routes
+// Log available routes (optional)
 app.get('/api/routes', (req, res) => {
   const routes = [];
   app._router.stack.forEach((middleware) => {
@@ -64,10 +65,4 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 9090;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`Try these endpoints:
-  - GET  http://localhost:${PORT}/api/recommendations/restaurants
-  - GET  http://localhost:${PORT}/api/users
-  - GET  http://localhost:${PORT}/api/events
-  - POST http://localhost:${PORT}/api/users
-  - POST http://localhost:${PORT}/api/events`);
 });
