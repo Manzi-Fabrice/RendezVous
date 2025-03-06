@@ -11,7 +11,7 @@ export async function fetchNearbyRestaurants(location, preferences) {
     console.log('🔍 Searching with preferences:', preferences);
 
     // Destructure the location values
-    const { lat, lng } = location; // e.g. { lat: 43.7022451, lng: -72.2895526 }
+    const { lat, lng } = location;
     const {
       maxDistance,
       cuisinePreferences,
