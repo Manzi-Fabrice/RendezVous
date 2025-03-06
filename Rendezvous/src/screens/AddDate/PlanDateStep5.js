@@ -22,7 +22,7 @@ const PlanDateStep5 = () => {
   };
   const sendDataToAI = async () => {
     console.log('📊 Checking datePlan before sending:', JSON.stringify(datePlan, null, 2));
-  
+
     if (!datePlan.maxDistance) {
       console.error('🚨 Error: maxDistance is undefined');
       return;
@@ -30,8 +30,8 @@ const PlanDateStep5 = () => {
     const LOCAL_BACKEND_URL = 'http://localhost:9090';
     try {
       const response = await fetch(
-        `${LOCAL_BACKEND_URL}/api/recommendations/personalized`,
-        //'https://project-api-sustainable-waste.onrender.com/api/recommendations/personalized',
+        // `${LOCAL_BACKEND_URL}/api/recommendations/personalized`,
+        'https://project-api-sustainable-waste.onrender.com/api/recommendations/personalized',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -41,10 +41,10 @@ const PlanDateStep5 = () => {
           }),
         }
       );
-  
+
       const data = await response.json();
       console.log('✅ API Response:', data);
-  
+
       if (response.ok) {
         navigation.navigate('RecommendedList', { recommendations: data });
 
@@ -55,9 +55,9 @@ const PlanDateStep5 = () => {
       console.error('❌ Error sending data to AI:', error);
     }
   };
-  
 
-  
+
+
 
   return (
     <View style={styles.container}>

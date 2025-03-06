@@ -148,7 +148,10 @@ export default function RecommendedDetails({ route }) {
           >
             <Text style={[styles.buttonText, styles.cancelButtonText]}>Go Back</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.button, styles.editButton]}>
+          <TouchableOpacity
+            style={[styles.button, styles.editButton]}
+            onPress={() => navigation.navigate('DateScreen')}
+          >
             <Text style={[styles.buttonText, styles.editButtonText]}>Add Date</Text>
           </TouchableOpacity>
         </View>

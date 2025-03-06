@@ -10,6 +10,7 @@ import AddDateScreen from '../screens/AddDate/AddDateScreen';
 import ProfileScreen from '../screens/Profile/ProfileScreen';
 import SearchStackNavigator from './SearchStackNavigator';
 
+
 const Tab = createBottomTabNavigator();
 
 const TabNavigator = () => {
@@ -41,7 +42,6 @@ const TabNavigator = () => {
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Search" component={SearchStackNavigator} />
-
       {/* Reset Date Plan when clicking Add Date */}
       <Tab.Screen
         name="Add Date"
