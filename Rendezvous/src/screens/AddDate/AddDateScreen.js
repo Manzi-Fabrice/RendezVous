@@ -8,6 +8,7 @@ import PlanDateStep4 from './PlanDateStep4';
 import PlanDateStep5 from './PlanDateStep5';
 import RecommendedListScreen from '../RecommendedList/RecommendedListScreen';
 import RecommendedDetails from '../RecommendedDetails/RecommendedScreen';
+import DateScreen from '../RecommendedDetails/DateScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -49,7 +50,6 @@ const AddDateScreen = () => {
           animation: route.params?.isGoingBack ? 'slide_from_left' : 'slide_from_right',
         })}
       />
-      {/* New screens */}
       <Stack.Screen
         name="RecommendedList"
         component={RecommendedListScreen}
@@ -60,6 +60,13 @@ const AddDateScreen = () => {
       <Stack.Screen
         name="RecommendedDetails"
         component={RecommendedDetails}
+        options={{
+          animation: 'slide_from_right',
+        }}
+      />
+      <Stack.Screen
+        name="DateScreen"
+        component={DateScreen}
         options={{
           animation: 'slide_from_right',
         }}

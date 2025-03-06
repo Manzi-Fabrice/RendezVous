@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   SafeAreaView,
   View,
@@ -11,26 +11,48 @@ import {
   TouchableOpacity
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import * as Location from 'expo-location';
 
 export default function SearchScreen() {
   const [searchText, setSearchText] = useState('');
   const [restaurants, setRestaurants] = useState([]);
   const navigation = useNavigation();
+  const [ userLocation, setUserLocation] = useState(null);
+  const [errorMsg, setErrorMsg] = useState(null);
 
-  // Hard-coded location
-  const userLocation = { lat: 40.7128, lng: -74.0060 };
-  const LOCAL_BACKEND_URL = 'http://localhost:9090';
+  useEffect(()=>{
+    const getLocation = async ()=>{
+      try{
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if ( status !== 'granted'){
+          setErrorMsg(' Permission Denied');
+          return;
+        }
+
+        let location = await Location.getCurrentPositionAsync({});
+        setUserLocation({
+          lat: location.coords.latitude,
+          lng:location.coords.longitude
+        });
+        console.log('User Location: ', location.coords);
+      }catch(error){
+        console.log("Failed to get location", error);
+      }
+    };
+
+    getLocation();
+  }, []);
+
 const fetchRestaurants = async () => {
   try {
     const response = await fetch(
-      `${LOCAL_BACKEND_URL}/api/recommendations/test/places`,
-      //'https://project-api-sustainable-waste.onrender.com/api/recommendations/test/places',
+      'http://localhost:9090/api/recommendations/test/places',
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           location: userLocation,
-          restaurantName: searchText.trim() || '' // Send empty string if no input
+          restaurantName: searchText.trim() || ''
         })
       }
     );
