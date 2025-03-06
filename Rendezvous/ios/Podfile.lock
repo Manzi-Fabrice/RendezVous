@@ -18,8 +18,6 @@ PODS:
     - ExpoModulesCore
   - ExpoKeepAwake (14.0.3):
     - ExpoModulesCore
-  - ExpoLocation (18.0.7):
-    - ExpoModulesCore
   - ExpoModulesCore (2.2.2):
     - DoubleConversion
     - glog
@@ -44,7 +42,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - Yoga
   - EXStructuredHeaders (4.0.0)
-  - EXUpdates (0.27.2):
+  - EXUpdates (0.27.1):
     - DoubleConversion
     - EASClient
     - EXManifests
@@ -1729,7 +1727,6 @@ DEPENDENCIES:
   - ExpoFileSystem (from `../node_modules/expo-file-system/ios`)
   - ExpoFont (from `../node_modules/expo-font/ios`)
   - ExpoKeepAwake (from `../node_modules/expo-keep-awake/ios`)
-  - ExpoLocation (from `../node_modules/expo-location/ios`)
   - ExpoModulesCore (from `../node_modules/expo-modules-core`)
   - EXStructuredHeaders (from `../node_modules/expo-structured-headers/ios`)
   - EXUpdates (from `../node_modules/expo-updates/ios`)
@@ -1832,8 +1829,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-font/ios"
   ExpoKeepAwake:
     :path: "../node_modules/expo-keep-awake/ios"
-  ExpoLocation:
-    :path: "../node_modules/expo-location/ios"
   ExpoModulesCore:
     :path: "../node_modules/expo-modules-core"
   EXStructuredHeaders:
@@ -1989,10 +1984,9 @@ SPEC CHECKSUMS:
   ExpoFileSystem: 2d804c73034c0d65eb2a640e0a77627033b69edc
   ExpoFont: f354e926f8feae5e831ec8087f36652b44a0b188
   ExpoKeepAwake: b0171a73665bfcefcfcc311742a72a956e6aa680
-  ExpoLocation: ab3b9fc6d87d05a13e7a254f2c42609031fe18b7
   ExpoModulesCore: 99b9db5170e8c407e367a4647beec3cc74d87799
   EXStructuredHeaders: 09c70347b282e3d2507e25fb4c747b1b885f87f6
-  EXUpdates: a92103c8a1353624eb3d3a2a66422b25678fdcec
+  EXUpdates: e4bcabc9987db190f563da40373e7d004841315a
   EXUpdatesInterface: 7c977640bdd8b85833c19e3959ba46145c5719db
   FBLazyVector: ca8044c9df513671c85167838b4188791b6f37e1
   fmt: 10c6e61f4be25dc963c36bd73fc7b1705fe975be
