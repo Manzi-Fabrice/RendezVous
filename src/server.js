@@ -5,12 +5,13 @@ import morgan from 'morgan';
 import mongoose from 'mongoose';
 import connectDB from './db.js'; // Ensure you have your DB connection file if needed
 import dotenv from 'dotenv';
-dotenv.config();
+dotenv.config({ path: '../.env' });
 
 import userRoutes from './routes/userRoutes.js';
 import eventRoutes from './routes/eventRoutes.js';
 import activityRoutes from './routes/activityRoutes.js';
 import recommendationRoutes from './routes/recommendationRoutes.js';
+import emailRoutes from './routes/emailRoute.js'
 
 const app = express();
 
@@ -31,9 +32,10 @@ app.use('/api/users', userRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/activities', activityRoutes);
 app.use('/api/recommendations', recommendationRoutes);
+app.use('/api', emailRoutes);
 
 app.get('/health', (req, res) => {
-  res.json({ 
+  res.json({
     status: 'ok',
     mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
   });
