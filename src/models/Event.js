@@ -13,6 +13,25 @@ const eventSchema = new mongoose.Schema(
     },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // User who made the event
     participants: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // People attending
+    // New fields for restaurant details
+    restaurant: {
+      name: { type: String, required: true },
+      address: { type: String, required: true },
+      imageUrl: { type: String },
+      rating: { type: Number, min: 0, max: 5 },
+    },
+    // Person they're going on the date with
+    dateWith: {
+      name: { type: String, required: true },
+      email: { type: String },
+    },
+    // Additional details
+    travelTime: { type: String },
+    preferences: {
+      budget: String,
+      cuisine: String,
+      dietaryRestrictions: [String],
+    }
   },
   { timestamps: true },
 );
