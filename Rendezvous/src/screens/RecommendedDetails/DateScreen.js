@@ -38,14 +38,13 @@ export default function DateScreen() {
       Alert.alert("Error", "Please add at least one attendee.");
       return;
     }
-  
     try {
-      const response = await fetch('http://localhost:9090/api/send-email', {
+      const response = await fetch('https://project-api-sustainable-waste.onrender.com/api/send-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ attendees, username: "YourNameHere" }), // 🔹 Explicitly include username
+        body: JSON.stringify({ attendees, username: "YourNameHere" }),
       });
-  
+
       const data = await response.json();
       if (data.success) {
         Alert.alert("Success", "Emails sent successfully!");
@@ -57,19 +56,16 @@ export default function DateScreen() {
       Alert.alert("Error", "Something went wrong.");
     }
   };
-  
+
   return (
     <SafeAreaView style={styles.container}>
-      {/* 🔹 Back Button */}
       <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
         <Ionicons name="arrow-back" size={28} color="black" />
       </TouchableOpacity>
 
-      {/* 🔹 Header */}
       <Text style={styles.header}>Connect with your date</Text>
       <Text style={styles.subText}>Add your date’s name and email to connect with them.</Text>
 
-      {/* 🔹 Input Fields */}
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
@@ -91,7 +87,6 @@ export default function DateScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* 🔹 Attendees List */}
       <FlatList
         data={attendees}
         keyExtractor={(item) => item.id.toString()}
@@ -109,15 +104,13 @@ export default function DateScreen() {
         )}
       />
 
-      {/* 🔹 Submit Button */}
       <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-        <Text style={styles.submitButtonText}>Get Started</Text>
+        <Text style={styles.submitButtonText}>Send Invite</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );
 }
 
-// 🔹 **Updated Styles**
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -213,4 +206,3 @@ const styles = StyleSheet.create({
     color: '#000',
   },
 });
-
