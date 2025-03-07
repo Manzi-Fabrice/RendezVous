@@ -8,22 +8,28 @@ import {
   Image,
   TouchableOpacity,
   ActivityIndicator,
-  Alert
+  Alert,
+  RefreshControl
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
-const HomeScreen = ({ route }) => {
-  const navigation = useNavigation();
+const HomeScreen = ({ route, navigation }) => {
   const [upcomingDates, setUpcomingDates] = useState([]);
-  const [selectedDateIndex, setSelectedDateIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Force a complete refresh when the app starts
+  useEffect(() => {
+    console.log('Initial load - forcing complete refresh');
+    fetchUpcomingDates(true);
+  }, []);
 
   // Use both useEffect and useFocusEffect to handle refresh
   useEffect(() => {
     if (route?.params?.refresh) {
       console.log('Refreshing due to route params');
-      fetchUpcomingDates();
+      fetchUpcomingDates(true);
     }
   }, [route?.params?.refresh]);
 
@@ -34,15 +40,22 @@ const HomeScreen = ({ route }) => {
     }, [])
   );
 
-  const fetchUpcomingDates = async () => {
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    fetchUpcomingDates(true).finally(() => setRefreshing(false));
+  }, []);
+
+  const fetchUpcomingDates = async (forceRefresh = false) => {
     try {
-      console.log('Fetching upcoming dates...');
+      console.log('Fetching upcoming dates...', forceRefresh ? '(forced refresh)' : '');
       setLoading(true); // Set loading to true when starting fetch
       
       const response = await fetch('http://localhost:9090/api/events/upcoming', {
         headers: {
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+          'If-None-Match': forceRefresh ? Math.random().toString() : undefined
         }
       });
       
@@ -53,26 +66,18 @@ const HomeScreen = ({ route }) => {
       const data = await response.json();
       console.log('Upcoming dates response length:', data.length);
       
-      // Check if we have any data
+      // More detailed logging of each date's attendees
       if (data.length > 0) {
-        console.log('First event date:', data[0].date);
-        console.log('First event title:', data[0].title);
-        console.log('First event restaurant:', data[0].restaurant?.name);
-        
-        if (data.length > 1) {
-          console.log('Additional events found:', data.length - 1);
-          data.slice(1).forEach((event, index) => {
-            console.log(`Event ${index + 2}: ${event.title} at ${event.restaurant?.name} on ${new Date(event.date).toLocaleString()}`);
-          });
-        }
+        data.forEach((date, i) => {
+          console.log(`Date ${i+1} - ${date.title}:`);
+          console.log('dateWith:', date.dateWith);
+          console.log('attendees:', JSON.stringify(date.attendees));
+          console.log('numberOfPeople:', date.numberOfPeople);
+        });
       }
       
       // Set all upcoming dates
       setUpcomingDates(data);
-      // Reset selected index if needed
-      if (selectedDateIndex >= data.length) {
-        setSelectedDateIndex(0);
-      }
       
     } catch (error) {
       console.error('Error fetching upcoming date:', error);
@@ -82,19 +87,15 @@ const HomeScreen = ({ route }) => {
     }
   };
 
-  const updateDateStatus = async (newStatus) => {
+  const updateDateStatus = async (eventId, newStatus) => {
     try {
-      if (!upcomingDates[selectedDateIndex]) {
-        return;
-      }
-      
       const response = await fetch('http://localhost:9090/api/events/status', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          eventId: upcomingDates[selectedDateIndex]._id,
+          eventId: eventId,
           status: newStatus
         }),
       });
@@ -106,8 +107,9 @@ const HomeScreen = ({ route }) => {
       const data = await response.json();
       
       // Update the specific date in our array
-      const updatedDates = [...upcomingDates];
-      updatedDates[selectedDateIndex] = data.event;
+      const updatedDates = upcomingDates.map(date => 
+        date._id === eventId ? data.event : date
+      );
       setUpcomingDates(updatedDates);
     
     } catch (error) {
@@ -162,125 +164,134 @@ const HomeScreen = ({ route }) => {
     );
   }
 
-  // Get the currently selected date
-  const upcomingDate = upcomingDates[selectedDateIndex];
-
+  // New vertical stacked layout
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView style={styles.container}>
-        {upcomingDates.length > 1 && (
-          <View style={styles.dateSelector}>
-            <Text style={styles.dateSelectorText}>Your upcoming dates:</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.datesList}>
-              {upcomingDates.map((date, index) => (
-                <TouchableOpacity 
-                  key={date._id} 
-                  style={[
-                    styles.dateBubble, 
-                    selectedDateIndex === index && styles.selectedDateBubble
-                  ]}
-                  onPress={() => setSelectedDateIndex(index)}
-                >
-                  <Text style={[
-                    styles.dateBubbleText, 
-                    selectedDateIndex === index && styles.selectedDateBubbleText
-                  ]}>
-                    {date.title}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
-        )}
-
-        <View style={styles.headerContainer}>
-          <Text style={styles.headerTitle}>Your upcoming date with</Text>
-          <Text style={styles.headerName}>{upcomingDate.dateWith.name}</Text>
-          <View style={[styles.statusTag, { backgroundColor: getStatusColor(upcomingDate.status) }]}>
-            <Text style={styles.statusText}>{upcomingDate.status}</Text>
-          </View>
-        </View>
-
-        <Image 
-          source={{ uri: upcomingDate.restaurant.imageUrl || 'https://via.placeholder.com/400x200' }} 
-          style={styles.mainImage} 
-        />
-
-        <View style={styles.restaurantContainer}>
-          <Text style={styles.restaurantName}>{upcomingDate.restaurant.name}</Text>
-          <View style={styles.ratingContainer}>
-            {[...Array(5)].map((_, index) => (
-              <Ionicons
-                key={index}
-                name={index < Math.floor(upcomingDate.restaurant.rating) ? "star" : "star-outline"}
-                size={16}
-                color="#FFD700"
-              />
-            ))}
-          </View>
-        </View>
-
-        <View style={styles.detailsContainer}>
-          <View style={styles.detailRow}>
-            <Ionicons name="location-outline" size={22} color="#333" style={styles.detailIcon} />
-            <Text style={styles.detailText}>{upcomingDate.restaurant.address}</Text>
-          </View>
-          <View style={styles.detailRow}>
-            <Ionicons name="walk" size={22} color="#333" style={styles.detailIcon} />
-            <Text style={styles.detailText}>{upcomingDate.travelTime || '15-20 min walk'}</Text>
-          </View>
-          <View style={styles.detailRow}>
-            <Ionicons name="calendar-outline" size={22} color="#333" style={styles.detailIcon} />
-            <Text style={styles.detailText}>{formatDateTime(upcomingDate.date)}</Text>
-          </View>
-          {upcomingDate.preferences && (
-            <View style={styles.preferencesContainer}>
-              <Text style={styles.preferencesTitle}>Preferences:</Text>
-              <Text style={styles.preferenceText}>Budget: {upcomingDate.preferences.budget}</Text>
-              <Text style={styles.preferenceText}>Cuisine: {upcomingDate.preferences.cuisine}</Text>
-              {upcomingDate.preferences.dietaryRestrictions?.length > 0 && (
-                <Text style={styles.preferenceText}>
-                  Dietary: {upcomingDate.preferences.dietaryRestrictions.join(', ')}
+      <View style={styles.headerContainer}>
+        <Text style={styles.pageTitle}>Your Upcoming Dates</Text>
+        <TouchableOpacity
+          style={styles.refreshButton}
+          onPress={() => {
+            console.log("Manual refresh requested");
+            fetchUpcomingDates(true);
+          }}
+        >
+          <Ionicons name="refresh" size={24} color="#6A0DAD" />
+        </TouchableOpacity>
+      </View>
+      
+      <ScrollView 
+        style={styles.container}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={['#6A0DAD']}
+          />
+        }
+      >
+        {upcomingDates.map((date) => (
+          <View key={date._id} style={styles.dateCard}>
+            <View style={styles.dateHeader}>
+              <Text style={styles.dateTitle}>{date.title}</Text>
+              <View style={[styles.statusTag, { backgroundColor: getStatusColor(date.status) }]}>
+                <Text style={styles.statusText}>{date.status}</Text>
+              </View>
+            </View>
+            
+            <View style={styles.dateWithRow}>
+              <Text style={styles.withLabel}>With: </Text>
+              <View style={styles.attendeesList}>
+                <Text style={styles.dateWithName}>
+                  {date.dateWith?.name || "Unknown"}
                 </Text>
+                
+                {date.attendees && date.attendees.length > 1 && (
+                  <>
+                    <Text style={styles.additionalAttendeesLabel}>
+                      {" "}and {date.attendees.length - 1} other{date.attendees.length > 2 ? 's' : ''}
+                    </Text>
+                    <TouchableOpacity
+                      onPress={() => {
+                        const attendeeNames = date.attendees.map(a => 
+                          a.name || a.email || "Unknown"
+                        ).join("\n• ");
+                        
+                        Alert.alert(
+                          "All Attendees",
+                          `• ${attendeeNames}`,
+                          [{ text: "OK" }]
+                        );
+                      }}
+                    >
+                      <Text style={styles.viewAllLink}> (view all)</Text>
+                    </TouchableOpacity>
+                  </>
+                )}
+              </View>
+            </View>
+
+            <Image 
+              source={{ uri: date.restaurant.imageUrl || 'https://via.placeholder.com/400x200' }} 
+              style={styles.dateImage} 
+            />
+
+            <View style={styles.restaurantInfo}>
+              <Text style={styles.restaurantName}>{date.restaurant.name}</Text>
+              <View style={styles.ratingContainer}>
+                {[...Array(5)].map((_, index) => (
+                  <Ionicons
+                    key={index}
+                    name={index < Math.floor(date.restaurant.rating) ? "star" : "star-outline"}
+                    size={16}
+                    color="#FFD700"
+                  />
+                ))}
+              </View>
+              <Text style={styles.addressText}>{date.restaurant.address}</Text>
+            </View>
+
+            <View style={styles.dateTimeRow}>
+              <Ionicons name="calendar-outline" size={18} color="#333" />
+              <Text style={styles.dateTimeText}>{formatDateTime(date.date)}</Text>
+            </View>
+
+            <View style={styles.buttonRow}>
+              {date.status === 'Pending' && (
+                <>
+                  <TouchableOpacity 
+                    style={[styles.actionButton, { backgroundColor: '#4CAF50' }]}
+                    onPress={() => updateDateStatus(date._id, 'Confirmed')}
+                  >
+                    <Text style={styles.actionButtonText}>Confirm</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={[styles.actionButton, { backgroundColor: '#F44336' }]}
+                    onPress={() => updateDateStatus(date._id, 'Canceled')}
+                  >
+                    <Text style={styles.actionButtonText}>Cancel</Text>
+                  </TouchableOpacity>
+                </>
+              )}
+              {date.status === 'Confirmed' && (
+                <TouchableOpacity 
+                  style={[styles.actionButton, { backgroundColor: '#F44336' }]}
+                  onPress={() => updateDateStatus(date._id, 'Canceled')}
+                >
+                  <Text style={styles.actionButtonText}>Cancel</Text>
+                </TouchableOpacity>
+              )}
+              {date.status === 'Canceled' && (
+                <TouchableOpacity 
+                  style={[styles.actionButton, { backgroundColor: '#4CAF50' }]}
+                  onPress={() => updateDateStatus(date._id, 'Confirmed')}
+                >
+                  <Text style={styles.actionButtonText}>Reconfirm</Text>
+                </TouchableOpacity>
               )}
             </View>
-          )}
-        </View>
-
-        <View style={styles.buttonRow}>
-          {upcomingDate.status === 'Pending' && (
-            <>
-              <TouchableOpacity 
-                style={[styles.actionButton, { backgroundColor: '#4CAF50' }]}
-                onPress={() => updateDateStatus('Confirmed')}
-              >
-                <Text style={styles.actionButtonText}>Confirm</Text>
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={[styles.actionButton, { backgroundColor: '#F44336' }]}
-                onPress={() => updateDateStatus('Canceled')}
-              >
-                <Text style={styles.actionButtonText}>Cancel</Text>
-              </TouchableOpacity>
-            </>
-          )}
-          {upcomingDate.status === 'Confirmed' && (
-            <TouchableOpacity 
-              style={[styles.actionButton, { backgroundColor: '#F44336' }]}
-              onPress={() => updateDateStatus('Canceled')}
-            >
-              <Text style={styles.actionButtonText}>Cancel</Text>
-            </TouchableOpacity>
-          )}
-          {upcomingDate.status === 'Canceled' && (
-            <TouchableOpacity 
-              style={[styles.actionButton, { backgroundColor: '#4CAF50' }]}
-              onPress={() => updateDateStatus('Confirmed')}
-            >
-              <Text style={styles.actionButtonText}>Reconfirm</Text>
-            </TouchableOpacity>
-          )}
-        </View>
+          </View>
+        ))}
       </ScrollView>
     </SafeAreaView>
   );
@@ -291,7 +302,7 @@ export default HomeScreen;
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#fff'
+    backgroundColor: '#f8f8f8'
   },
   loadingContainer: {
     flex: 1,
@@ -311,28 +322,50 @@ const styles = StyleSheet.create({
     marginBottom: 20
   },
   container: {
-    flex: 1,
-    backgroundColor: '#fff'
+    flex: 1
   },
   headerContainer: {
     paddingHorizontal: 16,
-    marginTop: 20,
-    marginBottom: 20
+    paddingVertical: 16,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center'
   },
-  headerTitle: {
-    fontSize: 16,
-    color: '#555',
-    fontWeight: '400'
-  },
-  headerName: {
+  pageTitle: {
     fontSize: 22,
-    color: '#000',
+    color: '#333',
     fontWeight: '700',
-    marginTop: 8,
-    marginBottom: 8
+    textAlign: 'center'
+  },
+  dateCard: {
+    backgroundColor: '#fff',
+    margin: 12,
+    marginBottom: 6,
+    marginTop: 6,
+    borderRadius: 10,
+    padding: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3
+  },
+  dateHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12
+  },
+  dateTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    flex: 1
   },
   statusTag: {
-    alignSelf: 'flex-start',
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 16,
@@ -342,63 +375,62 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: 'bold',
   },
-  mainImage: {
-    width: '100%',
-    height: 200,
-    resizeMode: 'cover'
-  },
-  restaurantContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    marginBottom: 10
-  },
-  restaurantName: {
-    fontSize: 24,
-    fontWeight: '700',
-    marginBottom: 6
-  },
-  ratingContainer: {
-    flexDirection: 'row'
-  },
-  detailsContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    marginBottom: 20
-  },
-  detailRow: {
+  dateWithRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 6
+    marginBottom: 12
   },
-  detailIcon: {
-    marginRight: 8
-  },
-  detailText: {
-    fontSize: 14,
-    color: '#333'
-  },
-  preferencesContainer: {
-    marginTop: 16,
-    padding: 12,
-    backgroundColor: '#f5f5f5',
-    borderRadius: 8,
-  },
-  preferencesTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 8,
-    color: '#333',
-  },
-  preferenceText: {
+  withLabel: {
     fontSize: 14,
     color: '#666',
-    marginBottom: 4,
+    marginRight: 4
+  },
+  dateWithName: {
+    fontSize: 16,
+    color: '#333',
+    fontWeight: '600'
+  },
+  dateImage: {
+    width: '100%',
+    height: 160,
+    resizeMode: 'cover',
+    borderRadius: 8,
+    marginBottom: 12
+  },
+  restaurantInfo: {
+    marginBottom: 12
+  },
+  restaurantName: {
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 6,
+    color: '#6A0DAD'
+  },
+  ratingContainer: {
+    flexDirection: 'row',
+    marginBottom: 4
+  },
+  addressText: {
+    fontSize: 14,
+    color: '#666'
+  },
+  dateTimeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    backgroundColor: '#f5f5f5',
+    padding: 8,
+    borderRadius: 6
+  },
+  dateTimeText: {
+    fontSize: 14,
+    color: '#666',
+    marginLeft: 8
   },
   buttonRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    paddingHorizontal: 16,
-    marginBottom: 20
+    marginTop: 12
   },
   actionButton: {
     flex: 1,
@@ -413,42 +445,21 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600'
   },
-  dateSelector: {
-    padding: 16,
-    paddingBottom: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee'
-  },
-  dateSelectorText: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 12,
-    color: '#333'
-  },
-  datesList: {
+  attendeesList: {
     flexDirection: 'row',
-    paddingBottom: 8
+    alignItems: 'center',
+    flexWrap: 'wrap'
   },
-  dateBubble: {
-    padding: 8,
-    paddingHorizontal: 12,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 20,
-    marginRight: 8,
-    backgroundColor: '#f9f9f9'
-  },
-  selectedDateBubble: {
-    borderColor: '#6A0DAD',
-    backgroundColor: '#f0e6ff',
-    borderWidth: 2
-  },
-  dateBubbleText: {
+  additionalAttendeesLabel: {
     fontSize: 14,
-    color: '#333'
+    color: '#666',
   },
-  selectedDateBubbleText: {
-    fontWeight: 'bold',
-    color: '#6A0DAD'
-  }
+  viewAllLink: {
+    fontSize: 14,
+    color: '#6A0DAD',
+    fontWeight: '600'
+  },
+  refreshButton: {
+    padding: 8,
+  },
 });
