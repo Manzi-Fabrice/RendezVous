@@ -1,5 +1,5 @@
 import express from 'express';
-import { getEvents, createEvent, updateEventStatus, getUpcomingDates } from '../controllers/eventController.js';
+import { getEvents, createEvent, updateEventStatus, getUpcomingDates, getEventById } from '../controllers/eventController.js';
 
 const router = express.Router();
 
@@ -8,6 +8,9 @@ router.get('/', getEvents);
 
 // Get upcoming dates for home screen
 router.get('/upcoming', getUpcomingDates);
+
+// Get event by ID
+router.get('/:id', getEventById);
 
 // Create a new event
 router.post('/', createEvent);

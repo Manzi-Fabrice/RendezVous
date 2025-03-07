@@ -20,6 +20,26 @@ export const getEvents = async (req, res) => {
   }
 };
 
+// Get event by ID
+export const getEventById = async (req, res) => {
+  console.log('✅ Inside getEventById controller, ID:', req.params.id);
+  
+  try {
+    const event = await Event.findById(req.params.id).populate('createdBy participants');
+    
+    if (!event) {
+      console.warn(`⚠ Event with ID ${req.params.id} not found`);
+      return res.status(404).json({ error: 'Event not found' });
+    }
+    
+    console.log('✅ Event found:', event.title);
+    res.json(event);
+  } catch (error) {
+    console.error('❌ Error fetching event by ID:', error);
+    res.status(500).json({ error: 'Failed to fetch event', message: error.message });
+  }
+};
+
 // Get upcoming dates for home screen
 export const getUpcomingDates = async (req, res) => {
   try {
