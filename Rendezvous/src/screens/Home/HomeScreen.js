@@ -142,6 +142,19 @@ const HomeScreen = ({ route, navigation }) => {
     }
   };
 
+  // Add this function to get a summary of attendee responses
+  const getAttendeeResponsesSummary = (date) => {
+    if (!date.attendeeResponses || date.attendeeResponses.length === 0) {
+      return "No responses yet";
+    }
+
+    const accepted = date.attendeeResponses.filter(r => r.response === 'Accepted').length;
+    const declined = date.attendeeResponses.filter(r => r.response === 'Declined').length;
+    const pending = date.attendees.length - accepted - declined;
+
+    return `${accepted} accepted, ${declined} declined, ${pending} pending`;
+  };
+
   if (loading) {
     return (
       <SafeAreaView style={[styles.safeArea, styles.loadingContainer]}>
@@ -254,6 +267,11 @@ const HomeScreen = ({ route, navigation }) => {
             <View style={styles.dateTimeRow}>
               <Ionicons name="calendar-outline" size={18} color="#333" />
               <Text style={styles.dateTimeText}>{formatDateTime(date.date)}</Text>
+            </View>
+
+            <View style={styles.responseRow}>
+              <Text style={styles.responseLabel}>Responses:</Text>
+              <Text style={styles.responseText}>{getAttendeeResponsesSummary(date)}</Text>
             </View>
 
             <View style={styles.buttonRow}>
@@ -461,5 +479,23 @@ const styles = StyleSheet.create({
   },
   refreshButton: {
     padding: 8,
+  },
+  responseRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    backgroundColor: '#f5f5f5',
+    padding: 8,
+    borderRadius: 6
+  },
+  responseLabel: {
+    fontSize: 14,
+    color: '#333',
+    fontWeight: '600',
+    marginRight: 6
+  },
+  responseText: {
+    fontSize: 14,
+    color: '#666',
   },
 });
