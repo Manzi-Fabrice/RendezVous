@@ -47,7 +47,7 @@ const PlanDateStep3 = () => {
       <Text style={step3Styles.questionText}>Where do you live?</Text>
       <TextInput
         style={step3Styles.input}
-        placeholder="Enter your location"
+        placeholder="City, State"
         placeholderTextColor="#aaa"
         value={datePlan.location}
         onChangeText={(text) => updateDatePlan('location', text)}
