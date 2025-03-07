@@ -55,24 +55,24 @@ export default function RecommendedDetails({ route }) {
           />
         ) : (
           <View style={[styles.carouselImage, styles.placeholder]}>
-            <Text>No Images</Text>
+            <Text style={styles.noImageText}>No Images</Text>
           </View>
         )}
         <View style={styles.infoCard}>
           <View style={styles.line}>
-            <Text>Ratings: {restaurant.rating} </Text>
-            <Ionicons name="star" size={18} color="#FFD700" style={styles.iconStyle} />
-            <Text style={styles.lineText}>
+            <Text style={styles.lineText}>Ratings: {restaurant.rating} </Text>
+            <Ionicons name="star" size={20} color="#FFD700" style={styles.iconStyle} />
+            <Text style={[styles.lineText, styles.reviewText]}>
               ({restaurant.reviewCount} reviews)
             </Text>
           </View>
 
           <View style={styles.line}>
-            <Text> Price: {restaurant.priceRange || 'N/A'} </Text>
+            <Text style={styles.lineText}>Price: {restaurant.priceRange || 'N/A'}</Text>
           </View>
 
           <View style={styles.line}>
-            <Ionicons name="location-outline" size={18} color="#666" style={styles.iconStyle} />
+            <Ionicons name="location-outline" size={20} color="#666" style={styles.iconStyle} />
             <Text style={styles.lineText}>{restaurant.address}</Text>
           </View>
 
@@ -80,14 +80,14 @@ export default function RecommendedDetails({ route }) {
             {restaurant.isOpenNow ? (
               <Ionicons
                 name="checkmark-circle-outline"
-                size={18}
+                size={20}
                 color="#28a745"
                 style={styles.iconStyle}
               />
             ) : (
               <Ionicons
                 name="close-circle-outline"
-                size={18}
+                size={20}
                 color="#dc3545"
                 style={styles.iconStyle}
               />
@@ -96,12 +96,12 @@ export default function RecommendedDetails({ route }) {
           </View>
 
           <View style={styles.line}>
-            <Ionicons name="car-outline" size={18} color="#666" style={styles.iconStyle} />
+            <Ionicons name="car-outline" size={20} color="#666" style={styles.iconStyle} />
             <Text style={styles.lineText}>{parkingText}</Text>
           </View>
 
           <View style={styles.line}>
-            <Ionicons name="call-outline" size={18} color="#666" style={styles.iconStyle} />
+            <Ionicons name="call-outline" size={20} color="#666" style={styles.iconStyle} />
             {restaurant.phone ? (
               <TouchableOpacity onPress={() => Linking.openURL(`tel:${restaurant.phone}`)}>
                 <Text style={[styles.lineText, styles.linkText]}>{phoneNumber}</Text>
@@ -113,32 +113,30 @@ export default function RecommendedDetails({ route }) {
 
           {restaurant.website && (
             <View style={styles.line}>
-              <Ionicons name="globe-outline" size={18} color="#666" style={styles.iconStyle} />
+              <Ionicons name="globe-outline" size={20} color="#666" style={styles.iconStyle} />
               <TouchableOpacity onPress={() => Linking.openURL(restaurant.website)}>
                 <Text style={[styles.lineText, styles.linkText]}>Website</Text>
               </TouchableOpacity>
             </View>
           )}
 
-          {/* filter out price since we already ahve it */}
           {restaurant.features && restaurant.features.length > 0 && (
             (() => {
-                const filteredFeatures = restaurant.features.filter(
+              const filteredFeatures = restaurant.features.filter(
                 (feature) => !feature.toLowerCase().startsWith('price:')
-                );
-                if (filteredFeatures.length === 0) return null;
-                return (
+              );
+              if (filteredFeatures.length === 0) return null;
+              return (
                 <View style={styles.featuresContainer}>
-                    {filteredFeatures.map((feature, index) => (
+                  {filteredFeatures.map((feature, index) => (
                     <View key={index} style={styles.featureChip}>
-                        <Text style={styles.featureText}>{feature}</Text>
+                      <Text style={styles.featureText}>{feature}</Text>
                     </View>
-                    ))}
+                  ))}
                 </View>
-                );
+              );
             })()
-            )}
-
+          )}
         </View>
 
         <View style={styles.buttonRow}>
@@ -172,13 +170,10 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     backgroundColor: '#fff'
   },
-  backButton: {
-    marginRight: 8
-  },
   restaurantTitle: {
-    fontSize: 20,
+    fontSize: 30,
     fontWeight: '700',
-    color: '#333'
+    color: '#6A0DAD'
   },
   carousel: {
     marginBottom: 12
@@ -193,36 +188,44 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#ccc'
   },
+  noImageText: {
+    fontSize: 18,
+    color: '#6A0DAD'
+  },
   infoCard: {
     backgroundColor: '#fff',
     borderRadius: 8,
     marginHorizontal: 16,
     padding: 16,
-    shadowColor: '#000',
+    shadowColor: '#6A0DAD',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 2
   },
   line: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10
+    marginBottom: 12
   },
   iconStyle: {
     marginRight: 8
   },
   lineText: {
-    fontSize: 15,
+    fontSize: 18,
     color: '#333'
   },
+  reviewText: {
+    marginLeft: 4
+  },
   linkText: {
-    color: '#1e90ff'
+    color: '#6A0DAD',
+    textDecorationLine: 'underline'
   },
   featuresContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginTop: 4
+    marginTop: 8
   },
   featureChip: {
     backgroundColor: '#E6D6F2',
@@ -235,39 +238,45 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   featureText: {
-    fontSize: 14,
+    fontSize: 16,
     color: '#6A0DAD'
   },
   buttonRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     paddingHorizontal: 16,
-    marginTop: 10,
+    marginTop: 20,
     marginBottom: 30
   },
   button: {
     flex: 1,
     marginHorizontal: 5,
-    paddingVertical: 12,
+    paddingVertical: 14,
     borderRadius: 6,
     alignItems: 'center'
   },
   cancelButton: {
     backgroundColor: '#fff',
     borderWidth: 1,
-    borderColor: '#999'
+    borderColor: '#E3C16F'
   },
   cancelButtonText: {
-    color: '#333'
+    
+    fontSize: 18,
+    
+    fontWeight: 'bold',
+    color: '#000',
   },
   editButton: {
-    backgroundColor: '#bfa355'
+    backgroundColor: '#E3C16F'
   },
   editButtonText: {
-    color: '#fff'
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#000',
   },
   buttonText: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '600'
   }
 });

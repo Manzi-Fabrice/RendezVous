@@ -11,8 +11,17 @@ const PlanDateStep2 = () => {
   const navigation = useNavigation();
   const { datePlan, updateDatePlan } = useDateContext(); // Get context values
   const [open, setOpen] = React.useState(false);
+  // Use local state for the dropdown value and initialize with context value
+  const [peopleValue, setPeopleValue] = React.useState(datePlan.people || null);
 
-  const dateTypes = ['Couples Date', 'Friend Date', 'Family Date', 'Kids Date', 'Casual Meetup', 'Business Meetup'];
+  const dateTypes = [
+    'Couples Date',
+    'Friend Date',
+    'Family Date',
+    'Kids Date',
+    'Casual Meetup',
+    'Business Meetup'
+  ];
   const items = [...Array(10).keys()].map((num) => ({
     label: String(num + 1),
     value: String(num + 1),
@@ -57,15 +66,23 @@ const PlanDateStep2 = () => {
 
       <DropDownPicker
         open={open}
-        value={datePlan.people}
+        value={peopleValue}
         items={items}
         setOpen={setOpen}
-        setValue={(val) => updateDatePlan('people', val)}
+        // Use the setter to update both local state and the context value.
+        setValue={(callback) => {
+          const newValue = callback(peopleValue);
+          setPeopleValue(newValue);
+          updateDatePlan('people', newValue);
+        }}
         setItems={() => {}}
         placeholder="Select number of people"
         containerStyle={step2Styles.dropdownContainer}
         style={step2Styles.picker}
-        dropDownContainerStyle={[step2Styles.dropDownBox, { height: open ? 90 : 0 }]} // Ensures only 2 items are visible
+        dropDownContainerStyle={[
+          step2Styles.dropDownBox,
+          { height: open ? 90 : 0 } // Ensures only 2 items are visible at a time
+        ]}
       />
 
       {/* Next Button (Disabled until selections are made) */}
