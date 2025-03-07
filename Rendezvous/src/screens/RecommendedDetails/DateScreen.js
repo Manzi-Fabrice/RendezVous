@@ -9,8 +9,13 @@ import {
   ScrollView,
   Alert
 } from 'react-native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
 export default function DateScreen() {
+  const navigation = useNavigation();
+  const route = useRoute();
+  const { restaurant } = route.params;
+  
   const [numberOfPeople, setNumberOfPeople] = useState('');
   const [attendees, setAttendees] = useState([]);
 
@@ -45,21 +50,86 @@ export default function DateScreen() {
     }
 
     try {
-      const response = await fetch('http://localhost:9090/api/send-email', {
+      // Create the date event with full details
+      const futureDate = new Date();
+      futureDate.setFullYear(2025); // Set to 2025 to ensure it's in the future
+      
+      const createDateResponse = await fetch('http://localhost:9090/api/events', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ attendees, username: "YourNameHere" }),
+        body: JSON.stringify({
+          title: `Date at ${restaurant.name}`,
+          location: restaurant.address,
+          dateWith: attendees[0],
+          status: 'Pending',
+          date: futureDate.toISOString(), // Use ISO string format
+          restaurant: {
+            name: restaurant.name,
+            address: restaurant.address,
+            rating: restaurant.rating,
+            priceRange: restaurant.priceRange,
+            imageUrl: restaurant.photos?.[0]?.url || null,
+          },
+          attendees: attendees,
+          numberOfPeople: attendees.length,
+        }),
       });
 
-      const data = await response.json();
-      if (data.success) {
-        Alert.alert("Success", "Emails sent successfully!");
+      if (!createDateResponse.ok) {
+        const errorData = await createDateResponse.json();
+        throw new Error(errorData.message || 'Failed to create date');
+      }
+
+      const dateData = await createDateResponse.json();
+
+      // Send invitations with updated format
+      const emailResponse = await fetch('http://localhost:9090/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          attendees,
+          username: "Rendezvous"
+        }),
+      });
+
+      if (emailResponse.ok) {
+        Alert.alert(
+          "Success",
+          "Date created and invitations sent!",
+          [
+            {
+              text: "OK",
+              onPress: () => {
+                // Navigate back to HomeScreen and force refresh
+                navigation.reset({
+                  index: 0,
+                  routes: [{ name: 'Home', params: { refresh: true } }],
+                });
+              }
+            }
+          ]
+        );
       } else {
-        Alert.alert("Error", "Failed to send emails.");
+        Alert.alert(
+          "Warning",
+          "Date created but failed to send some invitations.",
+          [
+            {
+              text: "OK",
+              onPress: () => {
+                // Navigate back to HomeScreen and force refresh
+                navigation.reset({
+                  index: 0,
+                  routes: [{ name: 'Home', params: { refresh: true } }],
+                });
+              }
+            }
+          ]
+        );
       }
     } catch (error) {
-      console.error(" Email send error:", error);
-      Alert.alert("Error", "Something went wrong.");
+      console.error("Error:", error);
+      Alert.alert("Error", "Failed to create date or send invitations.");
     }
   };
 
@@ -83,6 +153,9 @@ export default function DateScreen() {
               placeholder="Name"
               value={attendee.name}
               onChangeText={(text) => updateAttendee(index, 'name', text)}
+              textContentType="name"
+              autoComplete="name"
+              autoCorrect={false}
             />
             <TextInput
               style={styles.input}
@@ -90,6 +163,9 @@ export default function DateScreen() {
               value={attendee.email}
               keyboardType="email-address"
               onChangeText={(text) => updateAttendee(index, 'email', text)}
+              textContentType="emailAddress"
+              autoComplete="email"
+              autoCapitalize="none"
             />
           </View>
         ))}
