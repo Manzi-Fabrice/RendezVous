@@ -25,6 +25,14 @@ const eventSchema = new mongoose.Schema(
       name: { type: String, required: true },
       email: { type: String },
     },
+    // All attendees for the date
+    attendees: [{
+      name: { type: String },
+      email: { type: String },
+      id: { type: Number }
+    }],
+    // Number of people attending
+    numberOfPeople: { type: Number },
     // Additional details
     travelTime: { type: String },
     preferences: {

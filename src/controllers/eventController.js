@@ -26,27 +26,20 @@ export const getUpcomingDates = async (req, res) => {
     const currentDate = new Date();
     console.log('Current date:', currentDate);
     
-    // First find all events to see what's available
-    const allEvents = await Event.find({});
-    console.log('All events in database:', JSON.stringify(allEvents.map(e => ({
-      id: e._id,
-      title: e.title,
-      date: e.date,
-      restaurant: e.restaurant?.name || 'No restaurant'
-    })), null, 2));
-    
-    // Modified approach: For debugging, return all events
+    // Find all events with detailed logging
     const events = await Event.find({})
     .populate('createdBy participants')
-    .sort({ date: -1 }) // Sort by date descending (newest first)
+    .sort({ createdAt: -1 })
     .limit(10);
     
-    console.log('Found upcoming events:', JSON.stringify(events.map(e => ({
-      id: e._id,
-      title: e.title,
-      date: e.date,
-      restaurant: e.restaurant?.name || 'No restaurant'
-    })), null, 2));
+    // Debug each event's attendees structure
+    events.forEach((event, index) => {
+      console.log(`Event ${index}: ${event.title}`);
+      console.log(`- dateWith:`, event.dateWith);
+      console.log(`- attendees:`, event.attendees);
+      console.log(`- numberOfPeople:`, event.numberOfPeople);
+      console.log(`- created:`, event.createdAt);
+    });
     
     res.json(events);
   } catch (error) {
@@ -69,16 +62,18 @@ export const createEvent = async (req, res) => {
       travelTime,
       preferences,
       attendees,
-      numberOfPeople
+      numberOfPeople,
+      status
     } = req.body;
 
     console.log('Creating new event with date:', date);
-    console.log('Date object type:', typeof date);
+    console.log('Attendees received:', attendees);
+    console.log('Number of people:', numberOfPeople);
 
     const event = new Event({
       title,
       description,
-      date: new Date(date), // Ensure proper date object
+      date: new Date(date),
       location,
       createdBy,
       restaurant,
@@ -87,7 +82,7 @@ export const createEvent = async (req, res) => {
       preferences,
       attendees,
       numberOfPeople,
-      status: 'Pending' // Default status
+      status: status || 'Pending'
     });
 
     await event.save();
@@ -98,7 +93,9 @@ export const createEvent = async (req, res) => {
       id: savedEvent._id,
       title: savedEvent.title,
       date: savedEvent.date,
-      restaurant: savedEvent.restaurant?.name
+      restaurant: savedEvent.restaurant?.name,
+      attendees: savedEvent.attendees,
+      numberOfPeople: savedEvent.numberOfPeople
     });
     
     if (createdBy) {
