@@ -14,7 +14,7 @@ import { AuthContext } from '../../context/AuthContext';
 
 export default function ProfileScreen() {
   const navigation = useNavigation();
-  const { signOut } = useContext(AuthContext);
+  const { signOut, userEmail } = useContext(AuthContext);
 
   const openUberLink = () => {
     Linking.openURL('https://www.uber.com/');
@@ -23,7 +23,7 @@ export default function ProfileScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
-        <Text style={styles.userName}>Profile</Text>
+        <Text style={styles.userName}>{userEmail || "Loading email..."}</Text>
         <View style={styles.profileImageWrapper}>
           <Image
             style={styles.profileImage}
@@ -33,6 +33,7 @@ export default function ProfileScreen() {
           />
         </View>
       </View>
+
 
       <ScrollView
         style={styles.bottomContainer}
@@ -70,12 +71,7 @@ export default function ProfileScreen() {
           <Text style={styles.listItemText}>Settings</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.listItem}
-          onPress={() => {
-            signOut();
-          }}
-        >
+        <TouchableOpacity style={styles.listItem} onPress={() => signOut()}>
           <Ionicons name="log-out-outline" size={24} color="#EF4444" />
           <Text style={[styles.listItemText, { color: '#EF4444' }]}>
             Log out
@@ -101,7 +97,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: '700',
     color: '#333',
-    marginBottom: 15,
+    marginBottom: 10,
   },
   profileImageWrapper: {
     width: 110,
