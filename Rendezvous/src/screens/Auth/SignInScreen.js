@@ -23,15 +23,15 @@ export default function SignInScreen({ navigation }) {
 
     try {
       const response = await fetch('https://project-api-sustainable-waste.onrender.com/api/users/login', {
-
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
       });
+
       const data = await response.json();
 
       if (response.ok) {
-        signIn(data.token);
+        signIn(data.token, email); 
       } else {
         alert(data.error || 'Sign in failed');
       }
@@ -40,6 +40,7 @@ export default function SignInScreen({ navigation }) {
       alert('Something went wrong. Please try again.');
     }
   };
+
 
   return (
     <SafeAreaView style={styles.safeArea}>
