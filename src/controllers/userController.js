@@ -53,7 +53,7 @@ export const loginUser = async (req, res) => {
 
 export const getUsers = async (req, res) => {
   try {
-    const users = await User.find().populate('createdEvents savedEvents');
+    const users = await User.find().populate('savedEvents');
     res.json(users);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch users' });
