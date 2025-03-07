@@ -32,11 +32,14 @@ export async function fetchNearbyRestaurants(location, preferences) {
     };
 
     // Use restaurantType or cuisinePreferences to set keyword
-    if (restaurantType && restaurantType.length > 0) {
+    if (preferences.restaurantName && preferences.restaurantName.trim().length > 0) {
+      params.keyword = preferences.restaurantName.trim();
+    } else if (restaurantType && restaurantType.length > 0) {
       params.keyword = `${restaurantType.join(' ')} restaurant`;
     } else if (cuisinePreferences && cuisinePreferences.length > 0) {
       params.keyword = cuisinePreferences.join(' ');
     }
+
 
     // If budget is provided (e.g. "$$" → length=2)
     if (budget && budget.length > 0) {
