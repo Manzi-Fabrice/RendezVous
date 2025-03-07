@@ -31,6 +31,15 @@ const eventSchema = new mongoose.Schema(
       email: { type: String },
       id: { type: Number }
     }],
+    // Track responses from attendees
+    attendeeResponses: [{
+      attendeeId: { type: String }, // ID of the attendee
+      response: { 
+        type: String,
+        enum: ['Accepted', 'Declined', 'Pending'],
+        default: 'Pending'
+      }
+    }],
     // Number of people attending
     numberOfPeople: { type: Number },
     // Additional details
