@@ -31,6 +31,7 @@ const InvitationPage = () => {
         return res.json();
       })
       .then((data) => {
+        console.log('Fetched invitation data:', data);
         setInvitation(data);
         setLoading(false);
       })
@@ -40,7 +41,6 @@ const InvitationPage = () => {
       });
   }, [eventId]);
 
-  // Wrap handleResponse in useCallback so it doesn't change on every render
   const handleResponse = useCallback((response) => {
     if (hasResponded) return;
     setHasResponded(true);
@@ -48,10 +48,7 @@ const InvitationPage = () => {
     fetch(`https://project-api-sustainable-waste.onrender.com/api/invitations/respond`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        eventId,
-        response,
-      }),
+      body: JSON.stringify({ eventId, response }),
     })
       .then((res) => res.json())
       .then((data) => {
@@ -61,7 +58,7 @@ const InvitationPage = () => {
           setResponseMessage('There was an error processing your response.');
         }
       })
-      .catch((err) => {
+      .catch(() => {
         setResponseMessage('There was an error processing your response.');
       });
   }, [eventId, hasResponded]);
@@ -85,7 +82,7 @@ const InvitationPage = () => {
     <div className="container">
       <h1 className="title">{restaurant.name}</h1>
       <div className="image-container">
-        {restaurant.photos && restaurant.photos[0]?.url ? (
+        {restaurant.photos && restaurant.photos.length > 0 && restaurant.photos[0].url ? (
           <img
             src={restaurant.photos[0].url}
             alt="Restaurant"
