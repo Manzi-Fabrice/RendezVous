@@ -86,7 +86,7 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.rendezvous"
+    namespace 'com.anonymous.Rendezvous'
     defaultConfig {
         applicationId 'com.anonymous.Rendezvous'
         minSdkVersion rootProject.ext.minSdkVersion

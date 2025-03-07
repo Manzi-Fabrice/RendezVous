@@ -9,14 +9,17 @@ import {
   Alert,
   StyleSheet
 } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
 export default function DateScreen() {
+  const navigation = useNavigation();
+  const route = useRoute();
+  const { restaurant } = route.params;
+  
+  const [numberOfPeople, setNumberOfPeople] = useState('');
   const [attendees, setAttendees] = useState([]);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const navigation = useNavigation();
 
   const addAttendee = () => {
     if (!name.trim() || !email.includes('@')) {
@@ -39,28 +42,89 @@ export default function DateScreen() {
       return;
     }
     try {
-      const response = await fetch('https://project-api-sustainable-waste.onrender.com/api/send-email', {
+      // Create the date event with full details
+      const futureDate = new Date();
+      futureDate.setFullYear(2025); // Ensure the date is in the future
+      
+      const createDateResponse = await fetch('https://project-api-sustainable-waste.onrender.com/api/events', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ attendees, username: "YourNameHere" }),
+        body: JSON.stringify({
+          title: `Date at ${restaurant.name}`,
+          location: restaurant.address,
+          dateWith: attendees[0],
+          status: 'Pending',
+          date: futureDate.toISOString(),
+          restaurant: {
+            name: restaurant.name,
+            address: restaurant.address,
+            rating: restaurant.rating,
+            priceRange: restaurant.priceRange,
+            imageUrl: restaurant.photos?.[0]?.url || null,
+          },
+          attendees: attendees,
+          numberOfPeople: attendees.length,
+        }),
       });
 
-      const data = await response.json();
-      if (data.success) {
-        Alert.alert("Success", "Emails sent successfully!");
+      if (!createDateResponse.ok) {
+        const errorData = await createDateResponse.json();
+        throw new Error(errorData.message || 'Failed to create date');
+      }
+
+      // Send invitations with updated format
+      const emailResponse = await fetch('https://project-api-sustainable-waste.onrender.com/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          attendees,
+          username: "Rendezvous"
+        }),
+      });
+
+      if (emailResponse.ok) {
+        Alert.alert(
+          "Success",
+          "Date created and invitations sent!",
+          [
+            {
+              text: "OK",
+              onPress: () => {
+                navigation.reset({
+                  index: 0,
+                  routes: [{ name: 'Home', params: { refresh: true } }],
+                });
+              }
+            }
+          ]
+        );
       } else {
-        Alert.alert("Error", "Failed to send emails.");
+        Alert.alert(
+          "Warning",
+          "Date created but failed to send some invitations.",
+          [
+            {
+              text: "OK",
+              onPress: () => {
+                navigation.reset({
+                  index: 0,
+                  routes: [{ name: 'Home', params: { refresh: true } }],
+                });
+              }
+            }
+          ]
+        );
       }
     } catch (error) {
-      console.error("Email send error:", error);
-      Alert.alert("Error", "Something went wrong.");
+      console.error("Error:", error);
+      Alert.alert("Error", "Failed to create date or send invitations.");
     }
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-        <Ionicons name="arrow-back" size={28} color="black" />
+        <Text style={styles.backButtonText}>←</Text>
       </TouchableOpacity>
 
       <Text style={styles.header}>Connect with your date</Text>
@@ -92,13 +156,12 @@ export default function DateScreen() {
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <View style={styles.attendeeCard}>
-            <Ionicons name="person-circle-outline" size={50} color="#666" />
             <View style={styles.attendeeInfo}>
               <Text style={styles.attendeeName}>{item.name}</Text>
               <Text style={styles.attendeeEmail}>{item.email}</Text>
             </View>
             <TouchableOpacity onPress={() => removeAttendee(item.id)}>
-              <Ionicons name="close-circle" size={24} color="#DC3545" />
+              <Text style={styles.removeButtonText}>✖</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -124,6 +187,10 @@ const styles = StyleSheet.create({
     left: 15,
     padding: 5,
   },
+  backButtonText: {
+    fontSize: 28,
+    color: 'black',
+  },
   header: {
     fontSize: 40,
     fontWeight: 'bold',
@@ -139,7 +206,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   inputContainer: {
-    flexDirection: 'column',
     alignItems: 'center',
     width: '100%',
     marginBottom: 15,
@@ -190,6 +256,10 @@ const styles = StyleSheet.create({
   attendeeEmail: {
     fontSize: 14,
     color: '#666',
+  },
+  removeButtonText: {
+    fontSize: 20,
+    color: '#DC3545',
   },
   submitButton: {
     backgroundColor: '#E3C16F',
