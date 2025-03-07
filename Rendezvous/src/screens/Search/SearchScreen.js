@@ -36,9 +36,9 @@ export default function SearchScreen() {
           lat: location.coords.latitude,
           lng: location.coords.longitude
         });
-        console.log('📍 User Location:', location.coords);
+        console.log('User Location:', location.coords);
       } catch (error) {
-        console.log("❌ Failed to get location:", error);
+        console.log("Failed to get location:", error);
       }
     };
 
@@ -54,7 +54,7 @@ export default function SearchScreen() {
 
     try {
       const response = await fetch(
-        'http://localhost:9090/api/recommendations/test/places',
+        'https://project-api-sustainable-waste.onrender.com/api/recommendations/test/places',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -70,7 +70,7 @@ export default function SearchScreen() {
 
       Keyboard.dismiss(); // Hide keyboard after search
     } catch (error) {
-      console.error('❌ Error fetching restaurants:', error);
+      console.error('Error fetching restaurants:', error);
     }
   };
 
@@ -116,7 +116,7 @@ export default function SearchScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.header}>Find Restaurants</Text>
-      
+
       <View style={styles.searchBarContainer}>
         <TextInput
           style={styles.searchInput}
@@ -124,8 +124,8 @@ export default function SearchScreen() {
           placeholderTextColor="#999"
           value={searchText}
           onChangeText={setSearchText}
-          onSubmitEditing={fetchRestaurants} // 🔹 Search on Enter Key Press
-          returnKeyType="search" // 🔹 Show 'Search' button on keyboard
+          onSubmitEditing={fetchRestaurants}
+          returnKeyType="search"
         />
         <TouchableOpacity onPress={fetchRestaurants} style={styles.searchButton}>
           <Ionicons name="search-outline" size={24} color="#fff" />
@@ -137,17 +137,16 @@ export default function SearchScreen() {
         keyExtractor={(item, index) => item.name + index}
         renderItem={renderRestaurant}
         contentContainerStyle={styles.listContainer}
-        keyboardShouldPersistTaps="handled" // 🔹 Ensures list is tappable when keyboard is open
+        keyboardShouldPersistTaps="handled"
       />
     </SafeAreaView>
   );
 }
 
-// 🔹 Matching Styles with RecommendedListScreen
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    backgroundColor: '#fff' 
+  container: {
+    flex: 1,
+    backgroundColor: '#fff'
   },
   header: {
     fontSize: 28,
@@ -181,7 +180,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 20,
   },
-  // 🔹 CARD STYLES
   card: {
     backgroundColor: '#fff',
     borderRadius: 10,

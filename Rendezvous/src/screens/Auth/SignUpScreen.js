@@ -25,7 +25,7 @@ export default function SignUpScreen({ navigation }) {
     }
 
     try {
-      const response = await fetch('http://localhost:9090/api/users', {
+      const response = await fetch('https://project-api-sustainable-waste.onrender.com/api/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -68,13 +68,18 @@ export default function SignUpScreen({ navigation }) {
         />
 
         <TextInput
-          style={styles.input}
-          placeholder="Password"
-          placeholderTextColor="#999"
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-        />
+        style={styles.input}
+        placeholder="Password"
+        placeholderTextColor="#999"
+        secureTextEntry
+        value={password}
+        textContentType ="oneTimeCode"
+        onChangeText={setPassword}
+        autoCapitalize="none"
+        autoCorrect={false}
+        autoComplete="off"
+      />
+
 
         <TextInput
           style={styles.input}
@@ -83,6 +88,10 @@ export default function SignUpScreen({ navigation }) {
           secureTextEntry
           value={confirmPassword}
           onChangeText={setConfirmPassword}
+          textContentType ="oneTimeCode"
+          autoCapitalize="none"
+          autoCorrect={false}
+          autoComplete="off"
         />
 
         <TouchableOpacity style={styles.signUpButton} onPress={handleSignUp}>
