@@ -43,19 +43,29 @@ router.get('/:userId/saved-restaurants', authMiddleware, async (req, res) => {
   }
 });
 
-router.get('/:userId', async (req, res) => {
+router.get('/:userId', authMiddleware, async (req, res) => {
   try {
-    const user = await User.findById(req.params.userId).populate('createdEvents savedEvents');
+    console.log(`Fetching user with ID: ${req.params.userId}`);
+    console.log(`User from token: ${JSON.stringify(req.user)}`);
+    
+    const user = await User.findById(req.params.userId).populate('savedEvents');
+    console.log(`User found: ${user ? 'Yes' : 'No'}`);
+    
     if (!user) {
+      console.log(`User not found with ID: ${req.params.userId}`);
       return res.status(404).json({ error: 'User not found' });
     }
+    
+    console.log(`Returning user data: ${user.name}, ${user.email}`);
     res.json(user);
   } catch (error) {
+    console.error(`Error fetching user: ${error.message}`);
+    console.error(error);
     res.status(500).json({ error: 'Failed to fetch user' });
   }
 });
 
-router.put('/:userId', async (req, res) => {
+router.put('/:userId', authMiddleware, async (req, res) => {
   try {
     const updates = req.body;
     const user = await User.findByIdAndUpdate(req.params.userId, updates, { new: true });
@@ -68,7 +78,7 @@ router.put('/:userId', async (req, res) => {
   }
 });
 
-router.delete('/:userId', async (req, res) => {
+router.delete('/:userId', authMiddleware, async (req, res) => {
   try {
     const user = await User.findByIdAndDelete(req.params.userId);
     if (!user) {
