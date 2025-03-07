@@ -72,13 +72,20 @@ export default function DateScreen() {
         throw new Error(errorData.message || 'Failed to create date');
       }
 
-      // Send invitations with updated format
+      // Get the created event data including the event ID
+      const eventData = await createDateResponse.json();
+      const eventId = eventData._id;
+      
+      console.log('Created event with ID:', eventId);
+
+      // Send invitations with the event ID
       const emailResponse = await fetch('https://project-api-sustainable-waste.onrender.com/api/send-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           attendees,
-          username: "Rendezvous"
+          username: "Rendezvous",
+          eventId: eventId
         }),
       });
 
@@ -128,7 +135,7 @@ export default function DateScreen() {
       </TouchableOpacity>
 
       <Text style={styles.header}>Connect with your date</Text>
-      <Text style={styles.subText}>Add your date’s name and email to connect with them.</Text>
+      <Text style={styles.subText}>Add your date's name and email to connect with them.</Text>
 
       <View style={styles.inputContainer}>
         <TextInput
