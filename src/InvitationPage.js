@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 
 function useQuery() {
@@ -23,7 +23,7 @@ const InvitationPage = () => {
       return;
     }
 
-    fetch(`http://localhost:9090/api/events/${eventId}`)
+    fetch(`https://project-api-sustainable-waste.onrender.com/api/events/${eventId}`)
       .then((res) => {
         if (!res.ok) {
           throw new Error('Failed to fetch invitation details.');
@@ -40,21 +40,12 @@ const InvitationPage = () => {
       });
   }, [eventId]);
 
-  useEffect(() => {
-    if (autoResponse && !hasResponded) {
-      if (autoResponse === 'accepted' || autoResponse === 'rejected') {
-        handleResponse(autoResponse);
-      }
-    }
-    // eslint-disable-next-line
-  }, [autoResponse]);
-
-  const handleResponse = (response) => {
-
+  // Wrap handleResponse in useCallback so it doesn't change on every render
+  const handleResponse = useCallback((response) => {
     if (hasResponded) return;
     setHasResponded(true);
 
-    fetch(`http://localhost:9090/api/invitations/respond`, {
+    fetch(`https://project-api-sustainable-waste.onrender.com/api/invitations/respond`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -73,7 +64,16 @@ const InvitationPage = () => {
       .catch((err) => {
         setResponseMessage('There was an error processing your response.');
       });
-  };
+  }, [eventId, hasResponded]);
+
+  useEffect(() => {
+    if (autoResponse && !hasResponded) {
+      if (autoResponse === 'accepted' || autoResponse === 'rejected') {
+        handleResponse(autoResponse);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoResponse]);
 
   if (loading) return <div>Loading invitation details...</div>;
   if (error) return <div>Error: {error}</div>;
