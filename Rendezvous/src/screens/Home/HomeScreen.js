@@ -49,8 +49,8 @@ const HomeScreen = ({ route, navigation }) => {
     try {
       console.log('Fetching upcoming dates...', forceRefresh ? '(forced refresh)' : '');
       setLoading(true); // Set loading to true when starting fetch
-      
-      const response = await fetch('http://localhost:9090/api/events/upcoming', {
+
+      const response = await fetch('https://project-api-sustainable-waste.onrender.com/api/events/upcoming', {
         headers: {
           'Cache-Control': 'no-cache, no-store, must-revalidate',
           'Pragma': 'no-cache',
@@ -58,14 +58,14 @@ const HomeScreen = ({ route, navigation }) => {
           'If-None-Match': forceRefresh ? Math.random().toString() : undefined
         }
       });
-      
+
       if (!response.ok) {
         throw new Error('Failed to fetch upcoming dates');
       }
-      
+
       const data = await response.json();
       console.log('Upcoming dates response length:', data.length);
-      
+
       // More detailed logging of each date's attendees
       if (data.length > 0) {
         data.forEach((date, i) => {
@@ -75,10 +75,10 @@ const HomeScreen = ({ route, navigation }) => {
           console.log('numberOfPeople:', date.numberOfPeople);
         });
       }
-      
+
       // Set all upcoming dates
       setUpcomingDates(data);
-      
+
     } catch (error) {
       console.error('Error fetching upcoming date:', error);
       Alert.alert('Error', 'Failed to load upcoming date');
@@ -105,13 +105,13 @@ const HomeScreen = ({ route, navigation }) => {
       }
 
       const data = await response.json();
-      
+
       // Update the specific date in our array
-      const updatedDates = upcomingDates.map(date => 
+      const updatedDates = upcomingDates.map(date =>
         date._id === eventId ? data.event : date
       );
       setUpcomingDates(updatedDates);
-    
+
     } catch (error) {
       console.error('Error updating status:', error);
       Alert.alert('Error', 'Failed to update date status');
@@ -192,8 +192,8 @@ const HomeScreen = ({ route, navigation }) => {
           <Ionicons name="refresh" size={24} color="#6A0DAD" />
         </TouchableOpacity>
       </View>
-      
-      <ScrollView 
+
+      <ScrollView
         style={styles.container}
         refreshControl={
           <RefreshControl
@@ -211,14 +211,14 @@ const HomeScreen = ({ route, navigation }) => {
                 <Text style={styles.statusText}>{date.status}</Text>
               </View>
             </View>
-            
+
             <View style={styles.dateWithRow}>
               <Text style={styles.withLabel}>With: </Text>
               <View style={styles.attendeesList}>
                 <Text style={styles.dateWithName}>
                   {date.dateWith?.name || "Unknown"}
                 </Text>
-                
+
                 {date.attendees && date.attendees.length > 1 && (
                   <>
                     <Text style={styles.additionalAttendeesLabel}>
@@ -226,10 +226,10 @@ const HomeScreen = ({ route, navigation }) => {
                     </Text>
                     <TouchableOpacity
                       onPress={() => {
-                        const attendeeNames = date.attendees.map(a => 
+                        const attendeeNames = date.attendees.map(a =>
                           a.name || a.email || "Unknown"
                         ).join("\n• ");
-                        
+
                         Alert.alert(
                           "All Attendees",
                           `• ${attendeeNames}`,
@@ -244,9 +244,9 @@ const HomeScreen = ({ route, navigation }) => {
               </View>
             </View>
 
-            <Image 
-              source={{ uri: date.restaurant.imageUrl || 'https://via.placeholder.com/400x200' }} 
-              style={styles.dateImage} 
+            <Image
+              source={{ uri: date.restaurant.imageUrl || 'https://via.placeholder.com/400x200' }}
+              style={styles.dateImage}
             />
 
             <View style={styles.restaurantInfo}>
@@ -277,13 +277,13 @@ const HomeScreen = ({ route, navigation }) => {
             <View style={styles.buttonRow}>
               {date.status === 'Pending' && (
                 <>
-                  <TouchableOpacity 
+                  <TouchableOpacity
                     style={[styles.actionButton, { backgroundColor: '#4CAF50' }]}
                     onPress={() => updateDateStatus(date._id, 'Confirmed')}
                   >
                     <Text style={styles.actionButtonText}>Confirm</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity 
+                  <TouchableOpacity
                     style={[styles.actionButton, { backgroundColor: '#F44336' }]}
                     onPress={() => updateDateStatus(date._id, 'Canceled')}
                   >
@@ -292,7 +292,7 @@ const HomeScreen = ({ route, navigation }) => {
                 </>
               )}
               {date.status === 'Confirmed' && (
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={[styles.actionButton, { backgroundColor: '#F44336' }]}
                   onPress={() => updateDateStatus(date._id, 'Canceled')}
                 >
@@ -300,7 +300,7 @@ const HomeScreen = ({ route, navigation }) => {
                 </TouchableOpacity>
               )}
               {date.status === 'Canceled' && (
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={[styles.actionButton, { backgroundColor: '#4CAF50' }]}
                   onPress={() => updateDateStatus(date._id, 'Confirmed')}
                 >
