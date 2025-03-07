@@ -11,7 +11,8 @@ import userRoutes from './routes/userRoutes.js';
 import eventRoutes from './routes/eventRoutes.js';
 import activityRoutes from './routes/activityRoutes.js';
 import recommendationRoutes from './routes/recommendationRoutes.js';
-import emailRoutes from './routes/emailRoute.js'
+import emailRoutes from './routes/emailRoute.js';
+import responseRoute from './routes/responseRoute.js';
 
 const app = express();
 
@@ -33,6 +34,7 @@ app.use('/api/events', eventRoutes);
 app.use('/api/activities', activityRoutes);
 app.use('/api/recommendations', recommendationRoutes);
 app.use('/api', emailRoutes);
+app.use('/api', responseRoute);
 
 app.get('/health', (req, res) => {
   res.json({
