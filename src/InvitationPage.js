@@ -23,7 +23,7 @@ const InvitationPage = () => {
       return;
     }
 
-    fetch(`https://project-api-sustainable-waste.onrender.com/api/events/${eventId}`)
+    fetch(`http://localhost:9090/api/events/${eventId}`)
       .then((res) => {
         if (!res.ok) {
           throw new Error('Failed to fetch invitation details.');
