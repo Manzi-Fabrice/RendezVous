@@ -7,7 +7,7 @@ function useQuery() {
 
 const InvitationPage = () => {
   const query = useQuery();
-  const inviteId = query.get('inviteId');
+  const eventId = query.get('eventId');
   const autoResponse = query.get('response');
 
   const [invitation, setInvitation] = useState(null);
@@ -17,13 +17,13 @@ const InvitationPage = () => {
   const [hasResponded, setHasResponded] = useState(false);
 
   useEffect(() => {
-    if (!inviteId) {
+    if (!eventId) {
       setError('No invitation ID provided.');
       setLoading(false);
       return;
     }
 
-    fetch(`http://localhost:9090/api/invitations/${inviteId}`)
+    fetch(`http://localhost:9090/api/events/${eventId}`)
       .then((res) => {
         if (!res.ok) {
           throw new Error('Failed to fetch invitation details.');
@@ -38,7 +38,7 @@ const InvitationPage = () => {
         setError(err.message);
         setLoading(false);
       });
-  }, [inviteId]);
+  }, [eventId]);
 
   useEffect(() => {
     if (autoResponse && !hasResponded) {
@@ -58,7 +58,7 @@ const InvitationPage = () => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        inviteId,
+        eventId,
         response,
       }),
     })
