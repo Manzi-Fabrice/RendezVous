@@ -4,13 +4,13 @@ import { sendEmailInvites } from '../services/emailService.js';
 const router = express.Router();
 
 router.post('/send-email', async (req, res) => {
-  const { attendees, username } = req.body;
+  const { attendees, username, eventId } = req.body;
 
-  if (!attendees || !attendees.length || !username) {
-    return res.status(400).json({ success: false, error: "Invalid request data" });
+  if (!attendees || !attendees.length || !username || !eventId) {
+    return res.status(400).json({ success: false, error: "Invalid request data. Required: attendees, username, eventId" });
   }
 
-  const result = await sendEmailInvites(attendees, username);
+  const result = await sendEmailInvites(attendees, username, eventId);
 
   if (result.success) {
     res.json(result);

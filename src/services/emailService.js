@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-export async function sendEmailInvites(attendees, username) {
+export async function sendEmailInvites(attendees, username, eventId) {
   try {
     const transport = nodemailer.createTransport({
       service: 'gmail',
@@ -14,13 +14,18 @@ export async function sendEmailInvites(attendees, username) {
     });
 
     for (let attendee of attendees) {
+      // Create a link to the event details page that includes only the event ID
+      const eventViewLink = `https://web-app-sustainable.onrender.com/invitation?eventId=${eventId}`;
+      
       const mailOptions = {
         from: process.env.EMAIL_USER,
         to: attendee.email,
         subject: "You're Invited!",
         html: `<p>Hello ${attendee.name},</p>
-               <p>You are invited to an event! ${username} has invited you to a date! Click the link below to confirm your attendance:</p>
-               <a href="https://your-event-link.com">Confirm Attendance</a>
+               <p>You are invited to an event! ${username} has invited you to a date!</p>
+               <p>Click the link below to view the event details and respond to the invitation:</p>
+               <p><a href="${eventViewLink}" style="display:inline-block; background-color:#E3C16F; color:black; padding:10px 20px; text-decoration:none; border-radius:5px;">View Event Details</a></p>
+               <p>Event ID: ${eventId}</p>
                <p>Best regards,</p>
                <p>The Rendezvous Team</p>`,
       };
