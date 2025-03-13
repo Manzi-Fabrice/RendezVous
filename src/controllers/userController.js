@@ -4,18 +4,20 @@ import jwt from 'jsonwebtoken';
 
 export const createUser = async (req, res) => {
   try {
-    const { name, email, password, preferences } = req.body;
+    const { name, phoneNumber, email, password, preferences } = req.body;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ error: 'User already exists' });
     }
+    // Hashing the Password and adding Salt to it
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const user = new User({
       name,
       email,
+      phoneNumber,
       password: hashedPassword,
       preferences,
     });

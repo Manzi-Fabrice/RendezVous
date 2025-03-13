@@ -25,14 +25,14 @@ const userPreferencesSchema = new mongoose.Schema({
   },
   searchRadius: {
     type: Number,
-    default: 5000,  // 5km default
-    min: 1000,      // 1km minimum
-    max: 50000      // 50km maximum
+    default: 5000,
+    min: 1000,
+    max: 50000
   },
   locationPreferences: {
     maxDistance: {
       type: Number,
-      default: 10,  // km
+      default: 10,
       min: 1,
       max: 50
     },
@@ -57,12 +57,13 @@ const userPreferencesSchema = new mongoose.Schema({
 
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
+  phoneNumber: {type: String, required: true},
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   preferences: userPreferencesSchema,
-  savedEvents: [{ 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'Event' 
+  savedEvents: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Event'
   }],
   savedRestaurants: [{
     name: String,
@@ -89,7 +90,6 @@ const userSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
-// Check if model exists before defining
 const User = mongoose.models.User || mongoose.model('User', userSchema);
 
-export default User; 
+export default User;
