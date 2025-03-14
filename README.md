@@ -60,6 +60,9 @@ This requires Node.js, npm, and Expo CLI installed globally.
 - API backend: https://project-api-sustainable-waste.onrender.com  
 - Expo mobile deployment: [View on Expo](http://expo.dev/preview/update?message=%20Working%20demo&updateRuntimeVersion=1.0.0&createdAt=2025-03-14T03%3A44%3A18.958Z&slug=exp&projectId=34694a17-6315-44a0-82ad-714b9fe4fa7a&group=09b33f3f-1066-47ea-9947-7f69b10976d8)  
 - Email web app: https://github.com/dartmouth-cs52-25w/Web-App-Sustainable.git
+### Expo credentials
+username: dejanaypinto
+Password: Rendezvous@123
 
 ## Authors
 
