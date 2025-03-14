@@ -20,7 +20,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#666',
     marginTop: 16,
-    marginBottom: 20
+    marginBottom: 20,
+    textAlign: 'center'
   },
   container: {
     flex: 1
@@ -36,35 +37,41 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   pageTitle: {
-    fontSize: 22,
-    color: '#333',
+    fontSize: 26,
+    color: 'black',
     fontWeight: '700',
     textAlign: 'center'
   },
+  refreshButton: {
+    padding: 8,
+  },
+ 
   dateCard: {
     backgroundColor: '#fff',
-    margin: 12,
-    marginBottom: 6,
-    marginTop: 6,
+    marginHorizontal: 12,
+    marginVertical: 6,
     borderRadius: 10,
     padding: 15,
+    borderColor: '#6A0DAD',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 3
+    elevation: 5,
+    overflow: 'hidden'
   },
-  dateHeader: {
+  cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 12
   },
-  dateTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-    flex: 1
+  restaurantNameModified: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#6A0DAD',
+    flex: 1,
+    flexWrap: 'wrap'
   },
   statusTag: {
     paddingHorizontal: 12,
@@ -76,6 +83,13 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: 'bold',
   },
+  dateImage: {
+    width: '100%',
+    height: 160,
+    resizeMode: 'cover',
+    borderRadius: 8,
+    marginBottom: 12
+  },
   dateWithRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -86,30 +100,36 @@ const styles = StyleSheet.create({
     color: '#666',
     marginRight: 4
   },
+  attendeesList: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap'
+  },
   dateWithName: {
     fontSize: 16,
     color: '#333',
     fontWeight: '600'
   },
-  dateImage: {
-    width: '100%',
-    height: 160,
-    resizeMode: 'cover',
-    borderRadius: 8,
-    marginBottom: 12
+  additionalAttendeesLabel: {
+    fontSize: 14,
+    color: '#666',
   },
-  restaurantInfo: {
-    marginBottom: 12
+  viewAllLink: {
+    fontSize: 14,
+    color: '#6A0DAD',
+    fontWeight: '600'
   },
-  restaurantName: {
-    fontSize: 18,
-    fontWeight: '700',
-    marginBottom: 6,
-    color: '#6A0DAD'
-  },
-  ratingContainer: {
+  ratingContainerModified: {
     flexDirection: 'row',
-    marginBottom: 4
+    marginBottom: 4,
+  },
+  locationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  locationIcon: {
+    marginRight: 4,
   },
   addressText: {
     fontSize: 14,
@@ -127,41 +147,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     marginLeft: 8
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginTop: 12
-  },
-  actionButton: {
-    flex: 1,
-    marginHorizontal: 5,
-    paddingVertical: 12,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  actionButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600'
-  },
-  attendeesList: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flexWrap: 'wrap'
-  },
-  additionalAttendeesLabel: {
-    fontSize: 14,
-    color: '#666',
-  },
-  viewAllLink: {
-    fontSize: 14,
-    color: '#6A0DAD',
-    fontWeight: '600'
-  },
-  refreshButton: {
-    padding: 8,
   },
   responseRow: {
     flexDirection: 'row',
@@ -181,6 +166,38 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
   },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: 12
+  },
+  actionButton: {
+    flex: 1,
+    marginHorizontal: 5,
+    paddingVertical: 12,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  actionButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600'
+  },
+  findEventButton: {
+    marginTop: 20,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    backgroundColor: '#6A0DAD',
+    borderRadius: 8,
+  },
+  findEventButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  
 });
 
 export default styles;

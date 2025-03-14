@@ -80,14 +80,34 @@ const HomeScreen = ({ navigation }) => {
 
   if (!events.length) {
     return (
-      <SafeAreaView style={[styles.safeArea, styles.noDateContainer]}>
-        <Text style={styles.noDateText}>You have no events.</Text>
+      <SafeAreaView style={styles.safeArea}>
+        {/* Header remains at the top */}
+        <View style={styles.headerContainer}>
+          <Text style={styles.pageTitle}>Your Events</Text>
+          <TouchableOpacity style={styles.refreshButton} onPress={onRefresh}>
+            <Ionicons name="refresh" size={24} color="#6A0DAD" />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.noDateContainer}>
+          <Ionicons name="calendar-outline" size={80} color="#ccc" style={{ marginBottom: 20 }} />
+          <Text style={styles.noDateText}>You have no events yet.</Text>
+          <TouchableOpacity
+            style={styles.findEventButton}
+            onPress={() => navigation.navigate('Search')}
+          >
+            <Text style={styles.findEventButtonText}>Find an Event</Text>
+          </TouchableOpacity>
+        </View>
       </SafeAreaView>
     );
   }
+  
+  
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      {/* Header */}
       <View style={styles.headerContainer}>
         <Text style={styles.pageTitle}>Your Events</Text>
         <TouchableOpacity style={styles.refreshButton} onPress={onRefresh}>
@@ -98,22 +118,26 @@ const HomeScreen = ({ navigation }) => {
       <ScrollView
         style={styles.container}
         refreshControl={
-          <RefreshControl
-            refreshing={loading}
-            onRefresh={onRefresh}
-            colors={['#6A0DAD']}
-          />
+          <RefreshControl refreshing={loading} onRefresh={onRefresh} colors={['#6A0DAD']} />
         }
       >
         {events.map((event) => (
           <View key={event._id} style={styles.dateCard}>
-            <View style={styles.dateHeader}>
-              <Text style={styles.dateTitle}>{event.title}</Text>
+            
+            <View style={styles.cardHeader}>
+              <Text style={styles.restaurantNameModified}>
+                {event.restaurant?.name || "Unknown Restaurant"}
+              </Text>
               <View style={[styles.statusTag, { backgroundColor: getStatusColor(event.status) }]}>
                 <Text style={styles.statusText}>{event.status}</Text>
               </View>
             </View>
 
+           
+            <Image
+              source={{ uri: event.restaurant?.imageUrl || 'https://via.placeholder.com/400x200' }}
+              style={styles.dateImage}
+            />
             <View style={styles.dateWithRow}>
               <Text style={styles.withLabel}>With: </Text>
               <View style={styles.attendeesList}>
@@ -140,25 +164,24 @@ const HomeScreen = ({ navigation }) => {
               </View>
             </View>
 
-            <Image
-              source={{ uri: event.restaurant.imageUrl || 'https://via.placeholder.com/400x200' }}
-              style={styles.dateImage}
-            />
-
-            <View style={styles.restaurantInfo}>
-              <Text style={styles.restaurantName}>{event.restaurant.name}</Text>
-              <View style={styles.ratingContainer}>
-                {[...Array(5)].map((_, index) => (
-                  <Ionicons
-                    key={index}
-                    name={index < Math.floor(event.restaurant.rating) ? "star" : "star-outline"}
-                    size={16}
-                    color="#FFD700"
-                  />
-                ))}
-              </View>
-              <Text style={styles.addressText}>{event.restaurant.address}</Text>
+            <View style={styles.ratingContainerModified}>
+              {[...Array(5)].map((_, index) => (
+                <Ionicons
+                  key={index}
+                  name={index < Math.floor(event.restaurant?.rating) ? "star" : "star-outline"}
+                  size={16}
+                  color="#6A0DAD"
+                />
+              ))}
             </View>
+
+        
+            {event.restaurant?.address && (
+              <View style={styles.locationRow}>
+                <Ionicons name="location-outline" size={16} color="#6A0DAD" style={styles.locationIcon} />
+                <Text style={styles.addressText}>{event.restaurant.address}</Text>
+              </View>
+            )}
 
             <View style={styles.dateTimeRow}>
               <Ionicons name="calendar-outline" size={18} color="#333" />

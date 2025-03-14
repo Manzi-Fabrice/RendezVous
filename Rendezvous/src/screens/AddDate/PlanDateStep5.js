@@ -32,12 +32,6 @@ const PlanDateStep5 = () => {
   };
 
   const sendDataToAI = async () => {
-    console.log('📊 Checking datePlan before sending:', JSON.stringify(datePlan, null, 2));
-
-    if (!datePlan.maxDistance) {
-      console.error('🚨 Error: maxDistance is undefined');
-      return;
-    }
 
     setLoading(true);
 
@@ -55,16 +49,14 @@ const PlanDateStep5 = () => {
       );
 
       const data = await response.json();
-      console.log('✅ API Response:', data);
-
       setLoading(false);
 
       if (response.ok && data.restaurants && data.restaurants.results.length > 0) {
         navigation.navigate('RecommendedList', { recommendations: data });
       } else {
-        // Delay updating error and modal visibility until after interactions complete.
+        
         InteractionManager.runAfterInteractions(() => {
-          // Only set error if the screen is still focused.
+          
           if (isFocused) {
             setError('No recommended restaurants found. Please adjust your preferences and try again.');
             setErrorVisible(true);
@@ -72,7 +64,6 @@ const PlanDateStep5 = () => {
         });
       }
     } catch (err) {
-      console.error('❌ Error sending data to AI:', err);
       setLoading(false);
       InteractionManager.runAfterInteractions(() => {
         if (isFocused) {

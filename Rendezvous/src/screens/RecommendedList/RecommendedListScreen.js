@@ -15,10 +15,8 @@ export default function RecommendedListScreen({ route }) {
   const navigation = useNavigation();
   const { recommendations } = route.params;
   
-  // Extract the array of restaurant objects
+ 
   const rawRestaurants = recommendations.restaurants?.results || [];
-  
-  // Sort restaurants: highest-rated first, then by distance (ascending)
   const sortedRestaurants = [...rawRestaurants].sort((a, b) => {
     if (b.rating !== a.rating) {
       return b.rating - a.rating;
@@ -30,7 +28,6 @@ export default function RecommendedListScreen({ route }) {
 
   const [restaurants] = useState(sortedRestaurants);
 
-  // Render a card for each restaurant.
   const renderRestaurant = ({ item }) => {
     const photoUrl = item.photos?.[0]?.url || null;
     const ratingText = item.rating ? `${item.rating.toFixed(1)}/5` : 'N/A';
@@ -49,7 +46,7 @@ export default function RecommendedListScreen({ route }) {
       >
         {photoUrl && <Image source={{ uri: photoUrl }} style={styles.cardImage} />}
         <View style={styles.cardContent}>
-          {/* Top Section - Name and Rating */}
+         
           <View style={styles.topRow}>
             <Text style={styles.restaurantName} numberOfLines={1}>{item.name}</Text>
             <View style={styles.ratingContainer}>
@@ -58,7 +55,7 @@ export default function RecommendedListScreen({ route }) {
             </View>
           </View>
 
-          {/* Second Row - Price, Description, Distance */}
+          
           <View style={styles.secondRow}>
             <Text style={styles.priceRange}>{priceRange}</Text>
             <Text style={styles.dot}>•</Text>
@@ -80,7 +77,7 @@ export default function RecommendedListScreen({ route }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Back Button */}
+     
       <TouchableOpacity onPress={() => navigation.navigate('PlanDateStep5')} style={styles.backButton}>
         <Ionicons name="arrow-back" size={28} color="black" />
       </TouchableOpacity>
@@ -96,7 +93,7 @@ export default function RecommendedListScreen({ route }) {
   );
 }
 
-// 🔹 **STYLES (Maintaining Original Layout & Aesthetic)**
+// STYLES 
 const styles = StyleSheet.create({
   container: { 
     flex: 1, 
@@ -107,7 +104,7 @@ const styles = StyleSheet.create({
     top: 60,
     left: 15,
     padding: 5,
-    zIndex: 10, // Ensures the button stays on top
+    zIndex: 10, 
   },
   header: {
     marginTop: 50,
@@ -127,12 +124,12 @@ const styles = StyleSheet.create({
     marginVertical: 8,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: '#6A0DAD', // Consistent purple border
+    borderColor: '#6A0DAD', 
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 2, // Subtle shadow for Android
+    elevation: 2, 
   },
   cardImage: {
     width: '100%',

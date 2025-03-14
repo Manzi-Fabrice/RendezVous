@@ -3,15 +3,15 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import DropDownPicker from 'react-native-dropdown-picker';
-import { useDateContext } from '../context/DateContext'; // Import DateContext
+import { useDateContext } from '../context/DateContext'; 
 import styles from './styles';
 import { StyleSheet } from 'react-native';
 
 const PlanDateStep2 = () => {
   const navigation = useNavigation();
-  const { datePlan, updateDatePlan } = useDateContext(); // Get context values
+  const { datePlan, updateDatePlan } = useDateContext(); 
   const [open, setOpen] = React.useState(false);
-  // Use local state for the dropdown value and initialize with context value
+
   const [peopleValue, setPeopleValue] = React.useState(datePlan.people || null);
 
   const dateTypes = [
@@ -27,7 +27,6 @@ const PlanDateStep2 = () => {
     value: String(num + 1),
   })).concat([{ label: 'More than 10', value: 'More than 10' }]);
 
-  // Check if all required fields are filled
   const isNextDisabled = !(datePlan.type && datePlan.people);
 
   return (
@@ -69,7 +68,6 @@ const PlanDateStep2 = () => {
         value={peopleValue}
         items={items}
         setOpen={setOpen}
-        // Use the setter to update both local state and the context value.
         setValue={(callback) => {
           const newValue = callback(peopleValue);
           setPeopleValue(newValue);
@@ -81,7 +79,7 @@ const PlanDateStep2 = () => {
         style={step2Styles.picker}
         dropDownContainerStyle={[
           step2Styles.dropDownBox,
-          { height: open ? 90 : 0 } // Ensures only 2 items are visible at a time
+          { height: open ? 90 : 0 } 
         ]}
       />
 
@@ -129,8 +127,8 @@ const step2Styles = StyleSheet.create({
     margin: 5,
   },
   selectedBubble: {
-    backgroundColor: '#6A0DAD', // Keeps the selected style from before
-    opacity: 0.9, // Slight transparency
+    backgroundColor: '#6A0DAD', 
+    opacity: 0.9, 
   },
   bubbleText: {
     fontSize: 16,
@@ -138,7 +136,7 @@ const step2Styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   selectedText: {
-    color: '#FFF', // White text for contrast
+    color: '#FFF', 
   },
   dropdownContainer: {
     width: '80%',
@@ -152,9 +150,9 @@ const step2Styles = StyleSheet.create({
   dropDownBox: {
     backgroundColor: '#FFF',
     borderColor: '#ddd',
-    maxHeight: 90, // Allows only 2 visible items, the rest are scrollable
+    maxHeight: 90, 
   },
   disabledButton: {
-    backgroundColor: '#ddd', // Greyed-out button
+    backgroundColor: '#ddd', 
   },
 });
