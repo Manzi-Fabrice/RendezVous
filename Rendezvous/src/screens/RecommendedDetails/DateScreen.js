@@ -51,7 +51,7 @@ export default function DateScreen() {
       const futureDate = new Date();
       futureDate.setFullYear(2025);
 
-      const createDateResponse = await fetch('//https://project-api-sustainable-waste.onrender.com/api/events', {
+      const createDateResponse = await fetch('https://project-api-sustainable-waste.onrender.com/api/events', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json',
           Authorization: `Bearer ${userToken}`

@@ -2,32 +2,30 @@ import React from 'react';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { useDateContext } from '../context/DateContext'; // Import DateContext
+import { useDateContext } from '../context/DateContext'; 
 import styles from './styles';
 import { StyleSheet } from 'react-native';
 
 const PlanDateStep3 = () => {
   const navigation = useNavigation();
-  const { datePlan, updateDatePlan } = useDateContext(); // Get context values
+  const { datePlan, updateDatePlan } = useDateContext(); 
 
   const transportOptions = ['Car', 'Bike', 'Public Transit', 'Walking'];
 
-  // Increase Distance
+  
   const increaseDistance = () => {
     updateDatePlan('maxDistance', Math.min(datePlan.maxDistance + 1, 50));
   };
 
-  // Decrease Distance
   const decreaseDistance = () => {
     updateDatePlan('maxDistance', Math.max(datePlan.maxDistance - 1, 1));
   };
 
-  // Toggle Distance Unit
+  
   const toggleDistanceUnit = () => {
     updateDatePlan('distanceUnit', datePlan.distanceUnit === 'Miles' ? 'KM' : 'Miles');
   };
 
-  // Check if Next button should be enabled
   const isNextDisabled = !datePlan.location || !datePlan.transport;
 
   return (
@@ -116,7 +114,7 @@ const PlanDateStep3 = () => {
 export default PlanDateStep3;
 
 
-// 🔹 Screen-Specific Styles for Step 3
+// Screen-Specific Styles for Step 3
 const step3Styles = StyleSheet.create({
   questionText: {
     fontSize: 18,
@@ -191,6 +189,6 @@ const step3Styles = StyleSheet.create({
     fontSize: 16,
   },
   disabledButton: {
-    backgroundColor: '#ddd', // Greyed-out button
+    backgroundColor: '#ddd', 
   },
 });

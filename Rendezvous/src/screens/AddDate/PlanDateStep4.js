@@ -2,13 +2,13 @@ import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { useDateContext } from '../context/DateContext'; // Import DateContext
+import { useDateContext } from '../context/DateContext'; 
 import styles from './styles';
 import { StyleSheet } from 'react-native';
 
 const PlanDateStep4 = () => {
   const navigation = useNavigation();
-  const { datePlan, updateDatePlan } = useDateContext(); // Get context values
+  const { datePlan, updateDatePlan } = useDateContext(); 
 
   const restaurantTypes = [
     'Fast Food', 'Casual Dining', 'Fine Dining', 'Café',
@@ -20,7 +20,7 @@ const PlanDateStep4 = () => {
     'Japanese', 'Indian', 'French', 'Mediterranean', 'Thai'
   ];
 
-  // Check if all required selections are made
+  
   const isNextDisabled = !(datePlan.restaurantType && datePlan.cuisine);
 
   return (
@@ -89,7 +89,7 @@ const PlanDateStep4 = () => {
 
 export default PlanDateStep4;
 
-// 🔹 Screen-Specific Styles for Step 4
+// Screen-Specific Styles for Step 4
 const step4Styles = StyleSheet.create({
   questionText: {
     fontSize: 18,
@@ -112,8 +112,8 @@ const step4Styles = StyleSheet.create({
     margin: 5,
   },
   selectedBubble: {
-    backgroundColor: '#6A0DAD', // Matches the selected style from screen 3
-    opacity: 0.9, // Slight transparency
+    backgroundColor: '#6A0DAD', 
+    opacity: 0.9, 
   },
   bubbleText: {
     fontSize: 16,
@@ -121,9 +121,9 @@ const step4Styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   selectedText: {
-    color: '#FFF', // White text for contrast
+    color: '#FFF', 
   },
   disabledButton: {
-    backgroundColor: '#ddd', // Greyed out button when not enabled
+    backgroundColor: '#ddd', 
   },
 });

@@ -2,14 +2,14 @@ import { StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#F3F4F6',
+    flex: 1,
+    backgroundColor: '#f8f8f8',
   },
   contentContainer: {
     paddingBottom: 40,
   },
-
   profileCard: {
-    backgroundColor: '#fff',
+    backgroundColor: '#EDE7F6', // Light purple background
     margin: 16,
     marginTop: 70,
     borderRadius: 12,
@@ -21,7 +21,8 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 4,
-    backgroundColor: '#E3C16F'
+    borderWidth: 1,
+    borderColor: '#6A0DAD'
   },
   profileImage: {
     width: 110,
@@ -40,23 +41,25 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: 16,
-    color: '#6B7280',
+    color: '#6A0DAD',
     fontWeight: '600',
+    marginRight: 4,
   },
   infoValue: {
     fontSize: 16,
-    color: '#111827',
+    color: '#333',
     fontWeight: '500',
   },
-
   menuContainer: {
     backgroundColor: '#fff',
     marginHorizontal: 16,
     borderRadius: 12,
     marginTop: 8,
-    elevation: 2,
-    paddingVertical: 8,
-
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   menuItem: {
     flexDirection: 'row',
@@ -88,7 +91,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   connectButton: {
-    backgroundColor: '#000',
+    backgroundColor: '#6A0DAD',
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 6,
@@ -102,13 +105,13 @@ const styles = StyleSheet.create({
   shareButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#4F46E5',
+    backgroundColor: '#6A0DAD',
     marginHorizontal: 14,
     marginVertical: 16,
     paddingVertical: 12,
+    paddingHorizontal: 20,
     borderRadius: 8,
     justifyContent: 'center',
-    gap: 8,
   },
   shareButtonText: {
     fontSize: 15,

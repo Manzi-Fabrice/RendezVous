@@ -48,7 +48,7 @@ export default function ProfileScreen() {
       <View style={styles.menuContainer}>
         <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('Home')}>
           <View style={styles.menuItemIcon}>
-            <Ionicons name="time-outline" size={22} color="#4F46E5" />
+            <Ionicons name="time-outline" size={22} color="#6A0DAD" />
           </View>
           <Text style={styles.menuItemText}>Saved Dates</Text>
           <Ionicons name="chevron-forward-outline" size={20} color="#999" />
@@ -56,7 +56,7 @@ export default function ProfileScreen() {
 
         <TouchableOpacity style={styles.menuItem}>
           <View style={styles.menuItemIcon}>
-            <Ionicons name="help-circle-outline" size={22} color="#4F46E5" />
+            <Ionicons name="help-circle-outline" size={22} color="#6A0DAD" />
           </View>
           <Text style={styles.menuItemText}>Help</Text>
           <Ionicons name="chevron-forward-outline" size={20} color="#999" />
@@ -64,7 +64,7 @@ export default function ProfileScreen() {
 
         <View style={[styles.menuItem, styles.uberCard]}>
           <View style={styles.menuItemIcon}>
-            <Ionicons name="car-outline" size={22} color="#000" />
+            <Ionicons name="car-outline" size={22} color="#6A0DAD" />
           </View>
           <View style={{ flex: 1 }}>
             <Text style={styles.uberTitle}>Connect Uber Account</Text>
@@ -81,7 +81,7 @@ export default function ProfileScreen() {
 
         <TouchableOpacity style={styles.menuItem}>
           <View style={styles.menuItemIcon}>
-            <Ionicons name="settings-outline" size={22} color="#4F46E5" />
+            <Ionicons name="settings-outline" size={22} color="#6A0DAD" />
           </View>
           <Text style={styles.menuItemText}>Settings</Text>
           <Ionicons name="chevron-forward-outline" size={20} color="#999" />
