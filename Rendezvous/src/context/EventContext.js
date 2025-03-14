@@ -40,7 +40,7 @@ export const EventProvider = ({ children }) => {
   const deleteEvent = useCallback(async (eventId) => {
     if (!userToken) return;
     try {
-        const response = await fetch(`http://localhost:9090/api/events/${eventId}`, {
+        const response = await fetch(`https://project-api-sustainable-waste.onrender.com/api/events/${eventId}`, {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',
