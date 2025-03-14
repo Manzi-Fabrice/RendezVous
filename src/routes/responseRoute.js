@@ -14,7 +14,7 @@ router.post('/respond', async (req, res) => {
   try {
     // Find the event
     const event = await Event.findById(eventId);
-    
+
     if (!event) {
       return res.status(404).json({ error: 'Event not found' });
     }
@@ -30,17 +30,15 @@ router.post('/respond', async (req, res) => {
 
     // Update attendee's response
     const attendeeResponse = response === 'accept' ? 'Accepted' : 'Declined';
-    
-    // Initialize responses array if it doesn't exist
+
     if (!event.attendeeResponses) {
       event.attendeeResponses = [];
     }
-    
-    // Update or add response for this attendee
+
     const responseIndex = event.attendeeResponses.findIndex(
       resp => String(resp.attendeeId) === attendeeId
     );
-    
+
     if (responseIndex !== -1) {
       event.attendeeResponses[responseIndex].response = attendeeResponse;
     } else {
@@ -49,24 +47,21 @@ router.post('/respond', async (req, res) => {
         response: attendeeResponse
       });
     }
-
-    // Check if all attendees have responded and update event status accordingly
     const allResponded = event.attendeeResponses.length === event.attendees.length;
     const allAccepted = event.attendeeResponses.every(resp => resp.response === 'Accepted');
-    
+
     if (allResponded && allAccepted) {
       event.status = 'Confirmed';
     } else if (attendeeResponse === 'Declined') {
-      // If primary person declines, cancel the event
-      if (String(event.dateWith._id) === attendeeId || 
-          event.dateWith.id === attendeeId || 
+      if (String(event.dateWith._id) === attendeeId ||
+          event.dateWith.id === attendeeId ||
           event.dateWith.email === event.attendees[attendeeIndex].email) {
         event.status = 'Canceled';
       }
     }
 
     await event.save();
-    
+
     return res.json({
       success: true,
       message: `You have ${attendeeResponse.toLowerCase()} the invitation.`,
@@ -79,7 +74,6 @@ router.post('/respond', async (req, res) => {
   }
 });
 
-// GET endpoint for responding to invitations via email link
 router.get('/respond', async (req, res) => {
   const { dateId, attendeeId, response } = req.query;
 
@@ -103,7 +97,7 @@ router.get('/respond', async (req, res) => {
   try {
     // Find the event
     const event = await Event.findById(dateId);
-    
+
     if (!event) {
       return res.status(404).send(`
         <html>
@@ -145,17 +139,17 @@ router.get('/respond', async (req, res) => {
 
     // Update attendee's response
     const attendeeResponse = response === 'accept' ? 'Accepted' : 'Declined';
-    
+
     // Initialize responses array if it doesn't exist
     if (!event.attendeeResponses) {
       event.attendeeResponses = [];
     }
-    
+
     // Update or add response for this attendee
     const responseIndex = event.attendeeResponses.findIndex(
       resp => String(resp.attendeeId) === attendeeId
     );
-    
+
     if (responseIndex !== -1) {
       event.attendeeResponses[responseIndex].response = attendeeResponse;
     } else {
@@ -168,13 +162,13 @@ router.get('/respond', async (req, res) => {
     // Check if all attendees have responded and update event status accordingly
     const allResponded = event.attendeeResponses.length === event.attendees.length;
     const allAccepted = event.attendeeResponses.every(resp => resp.response === 'Accepted');
-    
+
     if (allResponded && allAccepted) {
       event.status = 'Confirmed';
     } else if (attendeeResponse === 'Declined') {
       // If primary person declines, cancel the event
-      if (String(event.dateWith._id) === attendeeId || 
-          event.dateWith.id === attendeeId || 
+      if (String(event.dateWith._id) === attendeeId ||
+          event.dateWith.id === attendeeId ||
           event.dateWith.email === event.attendees[attendeeIndex].email) {
         event.status = 'Canceled';
       }
@@ -184,13 +178,13 @@ router.get('/respond', async (req, res) => {
 
     // Return a nice confirmation page
     const color = attendeeResponse === 'Accepted' ? '#4CAF50' : '#F44336';
-    const message = attendeeResponse === 'Accepted' ? 
-      'You have accepted the invitation.' : 
+    const message = attendeeResponse === 'Accepted' ?
+      'You have accepted the invitation.' :
       'You have declined the invitation.';
-    
+
     // Link back to the event details
     const eventDetailsLink = `https://project-api-sustainable-waste.onrender.com/api/events/view/${dateId}?attendeeId=${attendeeId}`;
-    
+
     return res.send(`
       <html>
         <head>
@@ -242,7 +236,7 @@ router.get('/respond', async (req, res) => {
         <body>
           <h1 class="confirmation">Response Recorded</h1>
           <p class="message">${message}</p>
-          
+
           <div class="details">
             <p><span class="label">Event:</span> ${event.title}</p>
             <p><span class="label">Date:</span> ${new Date(event.date).toLocaleString()}</p>
@@ -250,7 +244,7 @@ router.get('/respond', async (req, res) => {
             <p><span class="label">Restaurant:</span> ${event.restaurant.name}</p>
             <p><span class="label">Status:</span> ${event.status}</p>
           </div>
-          
+
           <a href="${eventDetailsLink}" class="back-button">Back to Event Details</a>
         </body>
       </html>
@@ -274,4 +268,4 @@ router.get('/respond', async (req, res) => {
   }
 });
 
-export default router; 
+export default router;

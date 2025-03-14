@@ -1,21 +1,20 @@
 import express from 'express';
-import { getEvents, createEvent, updateEventStatus, getUpcomingDates, getEventById } from '../controllers/eventController.js';
+import { getEvents, createEvent, updateEventStatus, getUpcomingDates, getEventById,deleteEvent } from '../controllers/eventController.js';
+import { authMiddleware } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// Get all events
-router.get('/', getEvents);
+router.get('/',authMiddleware,getEvents);
 
-// Get upcoming dates for home screen
-router.get('/upcoming', getUpcomingDates);
+router.get('/upcoming', authMiddleware, getUpcomingDates);
 
-// Get event by ID
-router.get('/:id', getEventById);
+router.get('/:id', authMiddleware, getEventById);
 
-// Create a new event
-router.post('/', createEvent);
+router.post('/', authMiddleware, createEvent);
 
-// Update event status (Pending, Confirmed, Canceled)
-router.patch('/status', updateEventStatus);
+router.patch('/status', authMiddleware, updateEventStatus);
+
+router.delete('/:id', authMiddleware, deleteEvent);
+
 
 export default router;
