@@ -16,7 +16,7 @@ export const EventProvider = ({ children }) => {
     setError(null);
 
     try {
-      const response = await fetch('http://localhost:9090/api/events', {
+      const response = await fetch('https://project-api-sustainable-waste.onrender.com/api/events', {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${userToken}`
