@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import {
   SafeAreaView,
   View,
@@ -7,23 +7,29 @@ import {
   TouchableOpacity,
   FlatList,
   Alert,
-  StyleSheet
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import styles from './DateStyle';
+import { validateEmail } from '../Auth/Validate';
+import { AuthContext } from '../../context/AuthContext';
 
 export default function DateScreen() {
   const navigation = useNavigation();
   const route = useRoute();
   const { restaurant } = route.params;
-  
-  const [numberOfPeople, setNumberOfPeople] = useState('');
   const [attendees, setAttendees] = useState([]);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const { userToken } = useContext(AuthContext);
 
   const addAttendee = () => {
-    if (!name.trim() || !email.includes('@')) {
-      Alert.alert("Error", "Please enter a valid name and email.");
+    if (!name.trim()) {
+      Alert.alert("Error", "Please enter a valid name");
+      return;
+    }
+
+    if (!validateEmail(email)){
+      Alert.alert("Error", "Please enter a valid name");
       return;
     }
 
@@ -42,13 +48,14 @@ export default function DateScreen() {
       return;
     }
     try {
-      // Create the date event with full details
       const futureDate = new Date();
-      futureDate.setFullYear(2025); // Ensure the date is in the future
-      
-      const createDateResponse = await fetch('https://project-api-sustainable-waste.onrender.com/api/events', {
+      futureDate.setFullYear(2025);
+
+      const createDateResponse = await fetch('//https://project-api-sustainable-waste.onrender.com/api/events', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json',
+          Authorization: `Bearer ${userToken}`
+         },
         body: JSON.stringify({
           title: `Date at ${restaurant.name}`,
           location: restaurant.address,
@@ -71,14 +78,11 @@ export default function DateScreen() {
         const errorData = await createDateResponse.json();
         throw new Error(errorData.message || 'Failed to create date');
       }
-
-      // Get the created event data including the event ID
       const eventData = await createDateResponse.json();
       const eventId = eventData._id;
-      
+
       console.log('Created event with ID:', eventId);
 
-      // Send invitations with the event ID
       const emailResponse = await fetch('https://project-api-sustainable-waste.onrender.com/api/send-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -180,106 +184,3 @@ export default function DateScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingHorizontal: 20,
-    backgroundColor: '#fff',
-    justifyContent: 'flex-start',
-  },
-  backButton: {
-    position: 'absolute',
-    top: 60,
-    left: 15,
-    padding: 5,
-  },
-  backButtonText: {
-    fontSize: 28,
-    color: 'black',
-  },
-  header: {
-    fontSize: 40,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginTop: 50,
-    color: '#333',
-  },
-  subText: {
-    fontSize: 18,
-    textAlign: 'center',
-    color: '#666',
-    marginTop: 20,
-    marginBottom: 20,
-  },
-  inputContainer: {
-    alignItems: 'center',
-    width: '100%',
-    marginBottom: 15,
-  },
-  input: {
-    width: '90%',
-    height: 45,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    backgroundColor: '#F8F8F8',
-    fontSize: 16,
-    marginBottom: 10,
-  },
-  addButton: {
-    backgroundColor: '#E3C16F',
-    paddingVertical: 12,
-    paddingHorizontal: 40,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 5,
-  },
-  addButtonText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#000',
-  },
-  attendeeCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f9f9f9',
-    padding: 10,
-    borderRadius: 10,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: '#ddd',
-  },
-  attendeeInfo: {
-    flex: 1,
-    marginLeft: 10,
-  },
-  attendeeName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  attendeeEmail: {
-    fontSize: 14,
-    color: '#666',
-  },
-  removeButtonText: {
-    fontSize: 20,
-    color: '#DC3545',
-  },
-  submitButton: {
-    backgroundColor: '#E3C16F',
-    paddingVertical: 12,
-    borderRadius: 10,
-    alignItems: 'center',
-    width: '70%',
-    alignSelf: 'center',
-    marginTop: 20,
-  },
-  submitButtonText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#000',
-  },
-});

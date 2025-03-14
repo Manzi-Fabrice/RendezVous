@@ -3,7 +3,6 @@ import {
   SafeAreaView,
   View,
   Text,
-  StyleSheet,
   TextInput,
   FlatList,
   Image,
@@ -13,6 +12,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import * as Location from 'expo-location';
+import styles from './SearchStyle';
 
 export default function SearchScreen() {
   const [searchText, setSearchText] = useState('');
@@ -21,7 +21,6 @@ export default function SearchScreen() {
   const [errorMsg, setErrorMsg] = useState(null);
   const navigation = useNavigation();
 
-  // Get User's Location
   useEffect(() => {
     const getLocation = async () => {
       try {
@@ -45,7 +44,6 @@ export default function SearchScreen() {
     getLocation();
   }, []);
 
-  // Fetch Restaurants
   const fetchRestaurants = async () => {
     if (!userLocation) {
       console.warn("⚠️ Waiting for location...");
@@ -68,13 +66,12 @@ export default function SearchScreen() {
       setRestaurants(data.results || []);
       console.log('🍽️ Restaurants from server:', data);
 
-      Keyboard.dismiss(); // Hide keyboard after search
+      Keyboard.dismiss();
     } catch (error) {
       console.error('Error fetching restaurants:', error);
     }
   };
 
-  // Render Restaurant Card
   const renderRestaurant = ({ item }) => {
     const photoUrl = item.photos?.[0]?.url || null;
     const ratingText = item.rating ? `${item.rating.toFixed(1)}/5` : 'N/A';
@@ -125,6 +122,7 @@ export default function SearchScreen() {
           value={searchText}
           onChangeText={setSearchText}
           onSubmitEditing={fetchRestaurants}
+          autoComplete="off"
           returnKeyType="search"
         />
         <TouchableOpacity onPress={fetchRestaurants} style={styles.searchButton}>
@@ -142,111 +140,3 @@ export default function SearchScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff'
-  },
-  header: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    color: '#6A0DAD',
-    marginVertical: 16,
-  },
-  searchBarContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginHorizontal: 16,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderRadius: 30,
-    borderWidth: 2,
-    borderColor: '#6A0DAD',
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 16,
-    color: '#333',
-  },
-  searchButton: {
-    backgroundColor: '#6A0DAD',
-    padding: 10,
-    borderRadius: 20,
-    marginLeft: 10,
-  },
-  listContainer: {
-    paddingHorizontal: 16,
-    paddingBottom: 20,
-  },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    marginVertical: 8,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: '#6A0DAD',
-  },
-  cardImage: {
-    width: '100%',
-    height: 170,
-    backgroundColor: '#eee',
-  },
-  cardContent: {
-    padding: 12,
-  },
-  topRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 4,
-  },
-  restaurantName: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#333',
-    flexShrink: 1,
-  },
-  ratingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  ratingText: {
-    fontSize: 14,
-    color: '#6A0DAD',
-    fontWeight: 'bold',
-    marginRight: 4,
-  },
-  starIcon: {
-    marginTop: 1,
-  },
-  secondRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  priceRange: {
-    fontSize: 14,
-    color: '#6A0DAD',
-    fontWeight: 'bold',
-  },
-  dot: {
-    marginHorizontal: 6,
-    fontSize: 14,
-    color: '#888',
-  },
-  shortDesc: {
-    fontSize: 14,
-    color: '#666',
-  },
-  distanceText: {
-    fontSize: 14,
-    color: '#666',
-  },
-  addressText: {
-    fontSize: 13,
-    color: '#999',
-  },
-});
