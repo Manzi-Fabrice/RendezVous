@@ -21,7 +21,7 @@ export default function SignInScreen({ navigation }) {
       return;
     }
     try {
-      const response = await fetch('https://project-api-sustainable-waste.onrender.com/api/users/loginlogin', {
+      const response = await fetch('https://project-api-sustainable-waste.onrender.com/api/users/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
