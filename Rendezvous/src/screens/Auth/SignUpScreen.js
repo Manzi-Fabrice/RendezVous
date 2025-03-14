@@ -4,23 +4,36 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   SafeAreaView
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import styles from './SignUpStyles';
+import { validateEmail, validatePhoneNumber } from './Validate';
 
 export default function SignUpScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [name, setName] = useState('');
 
   const handleSignUp = async () => {
-    if (!email || !password || !confirmPassword) {
+    if (!email || !password || !confirmPassword || !phoneNumber) {
       alert('Please fill all fields');
       return;
     }
     if (password !== confirmPassword) {
       alert('Passwords do not match');
+      return;
+    }
+
+    if(!validateEmail(email)){
+      alert('Please enter a valid email');
+      return;
+    }
+
+    if(!validatePhoneNumber(phoneNumber)){
+      alert('Please enter a valid phone Number');
       return;
     }
 
@@ -31,13 +44,14 @@ export default function SignUpScreen({ navigation }) {
         body: JSON.stringify({
           email,
           password,
-          name: 'Sample User'
+          name,
+          phoneNumber
         })
       });
       const data = await response.json();
 
       if (response.ok) {
-        alert('User registered successfully!');
+        alert('User registered successfully! Please Sign In');
         navigation.navigate('SignIn');
       } else {
         alert(data.error || 'Sign up failed');
@@ -59,12 +73,32 @@ export default function SignUpScreen({ navigation }) {
 
         <TextInput
           style={styles.input}
+          placeholder="Input Your Name"
+          placeholderTextColor="#999"
+          keyboardType="name-phone-pad"
+          autoCapitalize="none"
+          value={name}
+          onChangeText={setName}
+        />
+
+        <TextInput
+          style={styles.input}
           placeholder="Email"
           placeholderTextColor="#999"
           keyboardType="email-address"
           autoCapitalize="none"
           value={email}
           onChangeText={setEmail}
+        />
+
+        <TextInput
+          style={styles.input}
+          placeholder="phone number"
+          placeholderTextColor="#999"
+          keyboardType="phone-pad"
+          autoCapitalize="none"
+          value={phoneNumber}
+          onChangeText={setPhoneNumber}
         />
 
         <TextInput
@@ -117,73 +151,3 @@ export default function SignUpScreen({ navigation }) {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#fff'
-  },
-  container: {
-    flex: 1,
-    paddingHorizontal: 24,
-    paddingTop: 20
-  },
-  backArrow: {
-    marginBottom: 20
-  },
-  title: {
-    fontSize: 24,
-    color: '#6A0DAD',
-    fontWeight: 'bold',
-    marginBottom: 30
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 16,
-    color: '#333',
-    marginBottom: 15
-  },
-  signUpButton: {
-    backgroundColor: '#6A0DAD',
-    paddingVertical: 14,
-    borderRadius: 8,
-    marginTop: 10
-  },
-  signUpButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-    textAlign: 'center'
-  },
-  signInLink: {
-    marginTop: 20,
-    alignSelf: 'center'
-  },
-  signInText: {
-    fontSize: 14,
-    color: '#333'
-  },
-  signInTextBold: {
-    color: '#6A0DAD',
-    fontWeight: '600'
-  },
-  paginationContainer: {
-    flexDirection: 'row',
-    alignSelf: 'center',
-    marginTop: 30
-  },
-  dot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#ccc',
-    marginHorizontal: 4
-  },
-  dotActive: {
-    backgroundColor: '#6A0DAD'
-  }
-});
