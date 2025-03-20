@@ -1,0 +1,27 @@
+{
+  "expo": {
+    "name": "Rendezvous",
+    "slug": "Rendezvous",
+    "version": "1.0.0",
+    "ios": {
+      "bundleIdentifier": "com.anonymous.Rendezvous",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "We need your location to find restaurants near you.",
+        "NSLocationAlwaysUsageDescription": "We need your location to improve recommendations."
+      }
+    },
+    "android": {
+      "package": "com.anonymous.Rendezvous"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "34694a17-6315-44a0-82ad-714b9fe4fa7a"
+      }
+    },
+    "runtimeVersion": "1.0.0",
+    "updates": {
+      "url": "https://u.expo.dev/34694a17-6315-44a0-82ad-714b9fe4fa7a"
+    },
+    "newArchEnabled": true
+  }
+}
