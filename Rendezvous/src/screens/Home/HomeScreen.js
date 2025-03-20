@@ -102,12 +102,11 @@ const HomeScreen = ({ navigation }) => {
       </SafeAreaView>
     );
   }
-  
-  
+
+
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {/* Header */}
       <View style={styles.headerContainer}>
         <Text style={styles.pageTitle}>Your Events</Text>
         <TouchableOpacity style={styles.refreshButton} onPress={onRefresh}>
@@ -123,7 +122,7 @@ const HomeScreen = ({ navigation }) => {
       >
         {events.map((event) => (
           <View key={event._id} style={styles.dateCard}>
-            
+
             <View style={styles.cardHeader}>
               <Text style={styles.restaurantNameModified}>
                 {event.restaurant?.name || "Unknown Restaurant"}
@@ -133,7 +132,7 @@ const HomeScreen = ({ navigation }) => {
               </View>
             </View>
 
-           
+
             <Image
               source={{ uri: event.restaurant?.imageUrl || 'https://via.placeholder.com/400x200' }}
               style={styles.dateImage}
@@ -175,7 +174,7 @@ const HomeScreen = ({ navigation }) => {
               ))}
             </View>
 
-        
+
             {event.restaurant?.address && (
               <View style={styles.locationRow}>
                 <Ionicons name="location-outline" size={16} color="#6A0DAD" style={styles.locationIcon} />

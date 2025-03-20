@@ -2,13 +2,13 @@ import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { useDateContext } from '../context/DateContext'; 
+import { useDateContext } from '../context/DateContext';
 import styles from './styles';
 import { StyleSheet } from 'react-native';
 
 const PlanDateStep4 = () => {
   const navigation = useNavigation();
-  const { datePlan, updateDatePlan } = useDateContext(); 
+  const { datePlan, updateDatePlan } = useDateContext();
 
   const restaurantTypes = [
     'Fast Food', 'Casual Dining', 'Fine Dining', 'Café',
@@ -20,23 +20,19 @@ const PlanDateStep4 = () => {
     'Japanese', 'Indian', 'French', 'Mediterranean', 'Thai'
   ];
 
-  
+
   const isNextDisabled = !(datePlan.restaurantType && datePlan.cuisine);
 
   return (
     <View style={styles.container}>
-      {/* Back Button */}
       <TouchableOpacity
         onPress={() => navigation.navigate('PlanDateStep3', { isGoingBack: true })}
         style={styles.backButton}
       >
         <Ionicons name="arrow-back" size={24} color="black" />
       </TouchableOpacity>
-
-      {/* Header */}
       <Text style={styles.headerText}>Let’s plan your date</Text>
 
-      {/* Restaurant Type Selection */}
       <Text style={step4Styles.questionText}>What type of restaurant are you looking for?</Text>
       <View style={step4Styles.bubbleContainer}>
         {restaurantTypes.map((type) => (
@@ -52,7 +48,6 @@ const PlanDateStep4 = () => {
         ))}
       </View>
 
-      {/* Cuisine Selection */}
       <Text style={step4Styles.questionText}>What type of cuisine would you like?</Text>
       <View style={step4Styles.bubbleContainer}>
         {cuisineTypes.map((cuisine) => (
@@ -68,16 +63,14 @@ const PlanDateStep4 = () => {
         ))}
       </View>
 
-      {/* Next Button */}
       <TouchableOpacity
         onPress={() => navigation.navigate('PlanDateStep5')}
-        style={[styles.nextButton, isNextDisabled && step4Styles.disabledButton]} // Disable styling
-        disabled={isNextDisabled} // Disable if selections are not made
+        style={[styles.nextButton, isNextDisabled && step4Styles.disabledButton]}
+        disabled={isNextDisabled}
       >
         <Text style={styles.nextButtonText}>Next</Text>
       </TouchableOpacity>
 
-      {/* Pagination Dots */}
       <View style={styles.paginationContainer}>
         {[...Array(5)].map((_, index) => (
           <View key={index} style={[styles.paginationDot, index === 3 && styles.activeDot]} />
@@ -89,7 +82,6 @@ const PlanDateStep4 = () => {
 
 export default PlanDateStep4;
 
-// Screen-Specific Styles for Step 4
 const step4Styles = StyleSheet.create({
   questionText: {
     fontSize: 18,
@@ -112,8 +104,8 @@ const step4Styles = StyleSheet.create({
     margin: 5,
   },
   selectedBubble: {
-    backgroundColor: '#6A0DAD', 
-    opacity: 0.9, 
+    backgroundColor: '#6A0DAD',
+    opacity: 0.9,
   },
   bubbleText: {
     fontSize: 16,
@@ -121,9 +113,9 @@ const step4Styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   selectedText: {
-    color: '#FFF', 
+    color: '#FFF',
   },
   disabledButton: {
-    backgroundColor: '#ddd', 
+    backgroundColor: '#ddd',
   },
 });

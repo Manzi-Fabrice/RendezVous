@@ -1,23 +1,23 @@
 import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  TouchableOpacity, 
-  Modal, 
-  ActivityIndicator, 
-  StyleSheet, 
-  InteractionManager 
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Modal,
+  ActivityIndicator,
+  StyleSheet,
+  InteractionManager
 } from 'react-native';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { useDateContext } from '../context/DateContext'; 
+import { useDateContext } from '../context/DateContext';
 import styles from './styles';
 
 const PlanDateStep5 = () => {
   const navigation = useNavigation();
   const isFocused = useIsFocused();
   const { datePlan, updateDatePlan } = useDateContext();
-  const [error, setError] = useState(null); 
+  const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [errorVisible, setErrorVisible] = useState(false);
 
@@ -54,9 +54,9 @@ const PlanDateStep5 = () => {
       if (response.ok && data.restaurants && data.restaurants.results.length > 0) {
         navigation.navigate('RecommendedList', { recommendations: data });
       } else {
-        
+
         InteractionManager.runAfterInteractions(() => {
-          
+
           if (isFocused) {
             setError('No recommended restaurants found. Please adjust your preferences and try again.');
             setErrorVisible(true);
@@ -76,18 +76,15 @@ const PlanDateStep5 = () => {
 
   return (
     <View style={styles.container}>
-      {/* Back Button */}
-      <TouchableOpacity 
-        onPress={() => navigation.navigate('PlanDateStep4')} 
+      <TouchableOpacity
+        onPress={() => navigation.navigate('PlanDateStep4')}
         style={styles.backButton}
       >
         <Ionicons name="arrow-back" size={24} color="black" />
       </TouchableOpacity>
 
-      {/* Header */}
       <Text style={styles.headerText}>Let’s plan your date</Text>
 
-      {/* Budget Selection */}
       <Text style={step5Styles.questionText}>What is your budget?</Text>
       <View style={step5Styles.bubbleContainer}>
         {budgetOptions.map((option) => (
@@ -103,20 +100,19 @@ const PlanDateStep5 = () => {
         ))}
       </View>
 
-      {/* Dietary Restrictions Selection */}
       <Text style={step5Styles.questionText}>Do you have any dietary restrictions?</Text>
       <View style={step5Styles.bubbleContainer}>
         {dietaryRestrictions.map((restriction) => (
           <TouchableOpacity
             key={restriction}
             style={[
-              step5Styles.bubble, 
+              step5Styles.bubble,
               datePlan.dietaryRestrictions.includes(restriction) && step5Styles.selectedBubble
             ]}
             onPress={() => toggleRestriction(restriction)}
           >
             <Text style={[
-              step5Styles.bubbleText, 
+              step5Styles.bubbleText,
               datePlan.dietaryRestrictions.includes(restriction) && step5Styles.selectedText
             ]}>
               {restriction}
@@ -125,19 +121,16 @@ const PlanDateStep5 = () => {
         ))}
       </View>
 
-      {/* Recommend Date Button */}
       <TouchableOpacity onPress={sendDataToAI} style={styles.nextButton}>
         <Text style={styles.nextButtonText}>Recommend Date</Text>
       </TouchableOpacity>
 
-      {/* Pagination Dots */}
       <View style={styles.paginationContainer}>
         {[...Array(5)].map((_, index) => (
           <View key={index} style={[styles.paginationDot, index === 4 && styles.activeDot]} />
         ))}
       </View>
 
-      {/* Loading Modal */}
       <Modal visible={loading} transparent animationType="fade">
         <View style={step5Styles.modalOverlay}>
           <View style={step5Styles.loadingModalContent}>
@@ -147,11 +140,10 @@ const PlanDateStep5 = () => {
         </View>
       </Modal>
 
-      {/* Error Modal */}
-      <Modal 
-        visible={errorVisible} 
-        transparent 
-        animationType="fade" 
+      <Modal
+        visible={errorVisible}
+        transparent
+        animationType="fade"
         onRequestClose={() => {
           setError(null);
           setErrorVisible(false);
@@ -159,7 +151,6 @@ const PlanDateStep5 = () => {
       >
         <View style={step5Styles.modalOverlay}>
           <View style={step5Styles.errorModalContent}>
-            {/* Close Button */}
             <TouchableOpacity
               onPress={() => {
                 setError(null);

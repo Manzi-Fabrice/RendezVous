@@ -1,4 +1,3 @@
-// src/screens/AddDate/AddDateScreen.js
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import PlanDateStep1 from './PlanDateStep1';

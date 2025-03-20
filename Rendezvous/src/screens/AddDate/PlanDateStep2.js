@@ -3,13 +3,13 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import DropDownPicker from 'react-native-dropdown-picker';
-import { useDateContext } from '../context/DateContext'; 
+import { useDateContext } from '../context/DateContext';
 import styles from './styles';
 import { StyleSheet } from 'react-native';
 
 const PlanDateStep2 = () => {
   const navigation = useNavigation();
-  const { datePlan, updateDatePlan } = useDateContext(); 
+  const { datePlan, updateDatePlan } = useDateContext();
   const [open, setOpen] = React.useState(false);
 
   const [peopleValue, setPeopleValue] = React.useState(datePlan.people || null);
@@ -31,7 +31,6 @@ const PlanDateStep2 = () => {
 
   return (
     <View style={styles.container}>
-      {/* Back Button */}
       <TouchableOpacity
         onPress={() => navigation.navigate('PlanDateStep1', { isGoingBack: true })}
         style={styles.backButton}
@@ -39,13 +38,10 @@ const PlanDateStep2 = () => {
         <Ionicons name="arrow-back" size={24} color="black" />
       </TouchableOpacity>
 
-      {/* Header */}
       <Text style={styles.headerText}>Let’s plan your date</Text>
 
-      {/* Question: Date Type */}
       <Text style={step2Styles.questionText}>What type of date are you going on?</Text>
 
-      {/* Date Type Selection */}
       <View style={step2Styles.bubbleContainer}>
         {dateTypes.map((type) => (
           <TouchableOpacity
@@ -60,7 +56,6 @@ const PlanDateStep2 = () => {
         ))}
       </View>
 
-      {/* Question: Number of People */}
       <Text style={step2Styles.questionText}>How many people are you inviting to the date?</Text>
 
       <DropDownPicker
@@ -79,11 +74,10 @@ const PlanDateStep2 = () => {
         style={step2Styles.picker}
         dropDownContainerStyle={[
           step2Styles.dropDownBox,
-          { height: open ? 90 : 0 } 
+          { height: open ? 90 : 0 }
         ]}
       />
 
-      {/* Next Button (Disabled until selections are made) */}
       <TouchableOpacity
         onPress={() => navigation.navigate('PlanDateStep3')}
         style={[styles.nextButton, isNextDisabled && step2Styles.disabledButton]}
@@ -92,7 +86,6 @@ const PlanDateStep2 = () => {
         <Text style={styles.nextButtonText}>Next</Text>
       </TouchableOpacity>
 
-      {/* Pagination Dots */}
       <View style={styles.paginationContainer}>
         {[...Array(5)].map((_, index) => (
           <View key={index} style={[styles.paginationDot, index === 1 && styles.activeDot]} />
@@ -104,7 +97,6 @@ const PlanDateStep2 = () => {
 
 export default PlanDateStep2;
 
-// 🔹 Screen-Specific Styles for Step 2
 const step2Styles = StyleSheet.create({
   questionText: {
     fontSize: 18,
@@ -127,8 +119,8 @@ const step2Styles = StyleSheet.create({
     margin: 5,
   },
   selectedBubble: {
-    backgroundColor: '#6A0DAD', 
-    opacity: 0.9, 
+    backgroundColor: '#6A0DAD',
+    opacity: 0.9,
   },
   bubbleText: {
     fontSize: 16,
@@ -136,7 +128,7 @@ const step2Styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   selectedText: {
-    color: '#FFF', 
+    color: '#FFF',
   },
   dropdownContainer: {
     width: '80%',
@@ -150,9 +142,9 @@ const step2Styles = StyleSheet.create({
   dropDownBox: {
     backgroundColor: '#FFF',
     borderColor: '#ddd',
-    maxHeight: 90, 
+    maxHeight: 90,
   },
   disabledButton: {
-    backgroundColor: '#ddd', 
+    backgroundColor: '#ddd',
   },
 });

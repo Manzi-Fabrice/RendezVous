@@ -9,7 +9,7 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   profileCard: {
-    backgroundColor: '#EDE7F6', // Light purple background
+    backgroundColor: '#EDE7F6', 
     margin: 16,
     marginTop: 70,
     borderRadius: 12,

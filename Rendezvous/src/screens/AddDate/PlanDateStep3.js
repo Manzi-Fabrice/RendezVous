@@ -2,17 +2,17 @@ import React from 'react';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { useDateContext } from '../context/DateContext'; 
+import { useDateContext } from '../context/DateContext';
 import styles from './styles';
 import { StyleSheet } from 'react-native';
 
 const PlanDateStep3 = () => {
   const navigation = useNavigation();
-  const { datePlan, updateDatePlan } = useDateContext(); 
+  const { datePlan, updateDatePlan } = useDateContext();
 
   const transportOptions = ['Car', 'Bike', 'Public Transit', 'Walking'];
 
-  
+
   const increaseDistance = () => {
     updateDatePlan('maxDistance', Math.min(datePlan.maxDistance + 1, 50));
   };
@@ -21,7 +21,7 @@ const PlanDateStep3 = () => {
     updateDatePlan('maxDistance', Math.max(datePlan.maxDistance - 1, 1));
   };
 
-  
+
   const toggleDistanceUnit = () => {
     updateDatePlan('distanceUnit', datePlan.distanceUnit === 'Miles' ? 'KM' : 'Miles');
   };
@@ -30,7 +30,6 @@ const PlanDateStep3 = () => {
 
   return (
     <View style={styles.container}>
-      {/* Back Button */}
       <TouchableOpacity
         onPress={() => navigation.navigate('PlanDateStep2', { isGoingBack: true })}
         style={styles.backButton}
@@ -38,10 +37,8 @@ const PlanDateStep3 = () => {
         <Ionicons name="arrow-back" size={24} color="black" />
       </TouchableOpacity>
 
-      {/* Header */}
       <Text style={styles.headerText}>Let’s plan your date</Text>
 
-      {/* Location Input */}
       <Text style={step3Styles.questionText}>Where do you live?</Text>
       <TextInput
         style={step3Styles.input}
@@ -51,7 +48,6 @@ const PlanDateStep3 = () => {
         onChangeText={(text) => updateDatePlan('location', text)}
       />
 
-      {/* Transportation Selection */}
       <Text style={step3Styles.questionText}>What is your main mode of transportation?</Text>
       <View style={step3Styles.transportContainer}>
         {transportOptions.map((option) => (
@@ -67,7 +63,6 @@ const PlanDateStep3 = () => {
         ))}
       </View>
 
-      {/* Distance Stepper */}
       <Text style={step3Styles.questionText}>What is the maximum distance you’re willing to travel for a date?</Text>
       <View style={step3Styles.distanceContainer}>
         <TouchableOpacity onPress={decreaseDistance} style={step3Styles.stepperButton}>
@@ -80,7 +75,6 @@ const PlanDateStep3 = () => {
           <Ionicons name="add-outline" size={24} color="black" />
         </TouchableOpacity>
 
-        {/* Miles/KM Toggle */}
         <TouchableOpacity
           style={[
             step3Styles.unitToggle,
@@ -92,7 +86,6 @@ const PlanDateStep3 = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Next Button (Disabled until selection is made) */}
       <TouchableOpacity
         onPress={() => navigation.navigate('PlanDateStep4')}
         style={[styles.nextButton, isNextDisabled && step3Styles.disabledButton]}
@@ -101,7 +94,6 @@ const PlanDateStep3 = () => {
         <Text style={styles.nextButtonText}>Next</Text>
       </TouchableOpacity>
 
-      {/* Pagination Dots */}
       <View style={styles.paginationContainer}>
         {[...Array(5)].map((_, index) => (
           <View key={index} style={[styles.paginationDot, index === 2 && styles.activeDot]} />
@@ -114,7 +106,6 @@ const PlanDateStep3 = () => {
 export default PlanDateStep3;
 
 
-// Screen-Specific Styles for Step 3
 const step3Styles = StyleSheet.create({
   questionText: {
     fontSize: 18,
@@ -189,6 +180,6 @@ const step3Styles = StyleSheet.create({
     fontSize: 16,
   },
   disabledButton: {
-    backgroundColor: '#ddd', 
+    backgroundColor: '#ddd',
   },
 });

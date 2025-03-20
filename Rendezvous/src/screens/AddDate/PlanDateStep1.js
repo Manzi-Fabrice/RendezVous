@@ -3,41 +3,35 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { useDateContext } from '../context/DateContext'; // Import context
+import { useDateContext } from '../context/DateContext';
 import styles from './styles';
 import { StyleSheet } from 'react-native';
 
 const PlanDateStep1 = () => {
   const navigation = useNavigation();
-  const { datePlan, updateDatePlan } = useDateContext(); // Get context values
+  const { datePlan, updateDatePlan } = useDateContext();
 
-  // Get today's date in YYYY-MM-DD format
   const today = new Date().toISOString().split('T')[0];
 
-  // Check if the selected date is valid (today or future)
   const isDateValid = datePlan.date && datePlan.date >= today;
 
   return (
     <View style={styles.container}>
-      {/* Back Button */}
       <TouchableOpacity onPress={() => navigation.navigate('Home')} style={styles.backButton}>
         <Ionicons name="arrow-back" size={24} color="black" />
       </TouchableOpacity>
 
-      {/* Header */}
       <Text style={styles.headerText}>Let’s plan your date</Text>
 
-      {/* Question */}
       <Text style={step1Styles.questionText}>What are your preferred availabilities for a date?</Text>
 
-      {/* Calendar */}
       <View style={step1Styles.calendarContainer}>
         <Calendar
           onDayPress={(day) => updateDatePlan('date', day.dateString)}
           markedDates={{
             [datePlan.date]: { selected: true, selectedColor: '#0066FF' },
           }}
-          minDate={today} // Prevents past date selection
+          minDate={today}
           theme={{
             todayTextColor: '#6A0DAD',
             arrowColor: '#6A0DAD',
@@ -46,7 +40,6 @@ const PlanDateStep1 = () => {
         />
       </View>
 
-      {/* Time Selector */}
       <View style={step1Styles.timeSelector}>
         <TouchableOpacity
           onPress={() =>
@@ -84,16 +77,14 @@ const PlanDateStep1 = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Next Button */}
       <TouchableOpacity
         onPress={() => isDateValid && navigation.navigate('PlanDateStep2')}
-        style={[styles.nextButton, !isDateValid && step1Styles.disabledButton]} // Disable styling
-        disabled={!isDateValid} // Disable if no valid date selected
+        style={[styles.nextButton, !isDateValid && step1Styles.disabledButton]}
+        disabled={!isDateValid}
       >
         <Text style={styles.nextButtonText}>Next</Text>
       </TouchableOpacity>
 
-      {/* Pagination Dots */}
       <View style={styles.paginationContainer}>
         {[...Array(5)].map((_, index) => (
           <View key={index} style={[styles.paginationDot, index === 0 && styles.activeDot]} />
@@ -105,7 +96,6 @@ const PlanDateStep1 = () => {
 
 export default PlanDateStep1;
 
-// 🔹 Screen-Specific Styles for Step 1 (Placed at the bottom)
 const step1Styles = StyleSheet.create({
   questionText: {
     fontSize: 18,
