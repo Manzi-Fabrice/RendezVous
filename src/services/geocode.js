@@ -1,4 +1,3 @@
-// src/services/geocode.js
 import fetch from 'node-fetch';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -6,7 +5,7 @@ dotenv.config();
 export async function geocodeAddress(cityName) {
   const apiKey = process.env.GOOGLE_MAPS_API_KEY;
   const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(cityName)}&key=${apiKey}`;
-  
+
   try {
     const response = await fetch(url);
     const data = await response.json();

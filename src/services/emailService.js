@@ -14,9 +14,8 @@ export async function sendEmailInvites(attendees, username, eventId) {
     });
 
     for (let attendee of attendees) {
-      // Create a link to the event details page that includes only the event ID
       const eventViewLink = `https://web-app-sustainable.onrender.com/invitation?eventId=${eventId}`;
-      
+
       const mailOptions = {
         from: process.env.EMAIL_USER,
         to: attendee.email,

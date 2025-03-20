@@ -2,8 +2,6 @@ import express from 'express';
 import Event from '../models/Event.js';
 
 const router = express.Router();
-
-// POST endpoint to handle responses from the frontend app
 router.post('/respond', async (req, res) => {
   const { eventId, attendeeId, response } = req.body;
 
@@ -12,14 +10,11 @@ router.post('/respond', async (req, res) => {
   }
 
   try {
-    // Find the event
     const event = await Event.findById(eventId);
 
     if (!event) {
       return res.status(404).json({ error: 'Event not found' });
     }
-
-    // Find the attendee in the event
     const attendeeIndex = event.attendees.findIndex(
       attendee => String(attendee._id) === attendeeId || String(attendee.id) === attendeeId
     );
@@ -27,8 +22,6 @@ router.post('/respond', async (req, res) => {
     if (attendeeIndex === -1) {
       return res.status(404).json({ error: 'Attendee not found' });
     }
-
-    // Update attendee's response
     const attendeeResponse = response === 'accept' ? 'Accepted' : 'Declined';
 
     if (!event.attendeeResponses) {
@@ -69,7 +62,6 @@ router.post('/respond', async (req, res) => {
       event: event
     });
   } catch (error) {
-    console.error('❌ Error processing response:', error);
     return res.status(500).json({ error: 'Failed to process response' });
   }
 });
@@ -95,7 +87,6 @@ router.get('/respond', async (req, res) => {
   }
 
   try {
-    // Find the event
     const event = await Event.findById(dateId);
 
     if (!event) {
@@ -115,7 +106,6 @@ router.get('/respond', async (req, res) => {
       `);
     }
 
-    // Find the attendee in the event
     const attendeeIndex = event.attendees.findIndex(
       attendee => String(attendee._id) === attendeeId || String(attendee.id) === attendeeId
     );
@@ -137,15 +127,12 @@ router.get('/respond', async (req, res) => {
       `);
     }
 
-    // Update attendee's response
     const attendeeResponse = response === 'accept' ? 'Accepted' : 'Declined';
 
     // Initialize responses array if it doesn't exist
     if (!event.attendeeResponses) {
       event.attendeeResponses = [];
     }
-
-    // Update or add response for this attendee
     const responseIndex = event.attendeeResponses.findIndex(
       resp => String(resp.attendeeId) === attendeeId
     );
@@ -158,15 +145,12 @@ router.get('/respond', async (req, res) => {
         response: attendeeResponse
       });
     }
-
-    // Check if all attendees have responded and update event status accordingly
     const allResponded = event.attendeeResponses.length === event.attendees.length;
     const allAccepted = event.attendeeResponses.every(resp => resp.response === 'Accepted');
 
     if (allResponded && allAccepted) {
       event.status = 'Confirmed';
     } else if (attendeeResponse === 'Declined') {
-      // If primary person declines, cancel the event
       if (String(event.dateWith._id) === attendeeId ||
           event.dateWith.id === attendeeId ||
           event.dateWith.email === event.attendees[attendeeIndex].email) {
@@ -176,13 +160,10 @@ router.get('/respond', async (req, res) => {
 
     await event.save();
 
-    // Return a nice confirmation page
     const color = attendeeResponse === 'Accepted' ? '#4CAF50' : '#F44336';
     const message = attendeeResponse === 'Accepted' ?
       'You have accepted the invitation.' :
       'You have declined the invitation.';
-
-    // Link back to the event details
     const eventDetailsLink = `https://project-api-sustainable-waste.onrender.com/api/events/view/${dateId}?attendeeId=${attendeeId}`;
 
     return res.send(`
@@ -250,7 +231,6 @@ router.get('/respond', async (req, res) => {
       </html>
     `);
   } catch (error) {
-    console.error('❌ Error processing response:', error);
     return res.status(500).send(`
       <html>
         <head>

@@ -1,4 +1,3 @@
-// src/services/googlePlaces.js
 import dotenv from 'dotenv';
 dotenv.config();
 import { Client } from '@googlemaps/google-maps-services-js';
@@ -8,9 +7,6 @@ const client = new Client({});
 
 export async function fetchNearbyRestaurants(location, preferences) {
   try {
-    console.log('🔍 Searching with preferences:', preferences);
-
-    // Destructure the location values
     const { lat, lng } = location;
     const {
       maxDistance,
@@ -19,11 +15,7 @@ export async function fetchNearbyRestaurants(location, preferences) {
       budget,
       dietaryRestrictions
     } = preferences;
-
-    // Convert km to meters (default to 10 km if maxDistance is undefined)
     const distanceInMeters = (maxDistance ?? 10) * 1000;
-
-    // Build params for the Google Places Nearby Search
     const params = {
       location: `${lat},${lng}`,
       radius: distanceInMeters,
@@ -31,7 +23,6 @@ export async function fetchNearbyRestaurants(location, preferences) {
       key: process.env.GOOGLE_MAPS_API_KEY,
     };
 
-    // Use restaurantType or cuisinePreferences to set keyword
     if (preferences.restaurantName && preferences.restaurantName.trim().length > 0) {
       params.keyword = preferences.restaurantName.trim();
     } else if (restaurantType && restaurantType.length > 0) {
@@ -40,23 +31,17 @@ export async function fetchNearbyRestaurants(location, preferences) {
       params.keyword = cuisinePreferences.join(' ');
     }
 
-
-    // If budget is provided (e.g. "$$" → length=2)
     if (budget && budget.length > 0) {
       params.minprice = budget.length;
       params.maxprice = budget.length;
     }
 
-    console.log('Search params:', params);
     const response = await client.placesNearby({ params });
     const places = response.data.results || [];
-    console.log(`✅ Found ${places.length} places from Google Places`);
 
-    // Capture lat and lng into new constants to ensure they are in scope inside the map callback
     const userLat = lat;
     const userLng = lng;
 
-    // Simplify the results, returning a "distance" object
     const simplified = places.map(place => {
       const distanceKm = calculateDistance({ lat: userLat, lng: userLng }, {
         lat: place.geometry.location.lat,
@@ -83,7 +68,6 @@ export async function fetchNearbyRestaurants(location, preferences) {
     return simplified;
 
   } catch (error) {
-    console.error('❌ Google Places API Error:', error.response?.data || error.message);
     throw error;
   }
 }

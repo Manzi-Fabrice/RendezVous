@@ -1,13 +1,7 @@
 import fetch from 'node-fetch';
 
 export async function getAIRecommendations(restaurants, preferences) {
-  console.log('🔍 Input to AI:', {
-    restaurants: restaurants.length,
-    preferences: preferences
-  });
-
   try {
-    // Add default values
     const defaultPreferences = {
       cuisinePreferences: [],
       dietaryRestrictions: [],
@@ -32,8 +26,6 @@ export async function getAIRecommendations(restaurants, preferences) {
         ...preferences?.locationPreferences
       }
     };
-
-    // Simplify the restaurant data for the AI
     const simplifiedRestaurants = restaurants.map(r => ({
       name: r.name,
       rating: r.rating,
@@ -66,12 +58,11 @@ export async function getAIRecommendations(restaurants, preferences) {
     ${JSON.stringify(simplifiedRestaurants, null, 2)}
 
     User preferences:
-    - Atmosphere: ${safePreferences.vibePreferences?.join(', ') || 'Any'} 
+    - Atmosphere: ${safePreferences.vibePreferences?.join(', ') || 'Any'}
     - Price: ${safePreferences.priceRangePreference.join(' to ') || 'Any'}
     - Rating: ${safePreferences.minimumRating}+
     - Distance: ${safePreferences.locationPreferences.maxDistance}km max`;
 
-    // Add detailed logging
     console.log('Deepseek API Request:', {
       prompt: prompt,
       restaurants: simplifiedRestaurants.length,
@@ -91,38 +82,29 @@ export async function getAIRecommendations(restaurants, preferences) {
       body: JSON.stringify({
         model: 'deepseek-chat',
         messages: [
-          { 
-            role: 'system', 
-            content: 'You are a restaurant recommendation expert focused on fine dining experiences.' 
+          {
+            role: 'system',
+            content: 'You are a restaurant recommendation expert focused on fine dining experiences.'
           },
           { role: 'user', content: prompt }
         ],
-        temperature: 0.7,  // Add some creativity
-        max_tokens: 1000,  // Allow longer responses
+        temperature: 0.7,
+        max_tokens: 1000,
         stream: false,
         timeout: 30000
       })
     });
 
-    // Log full response
-    console.log('Deepseek Response Status:', response.status);
-    const responseText = await response.text();
-    console.log('Deepseek Raw Response:', responseText);
 
+    const responseText = await response.text();
     if (!response.ok) {
-      console.log('Deepseek API error:', response.status, responseText);
       return getSmartFallbackRecommendations(restaurants, preferences);
     }
 
     try {
       const data = JSON.parse(responseText);
-      console.log('Deepseek Response Content:', data.choices[0].message.content);
-
-      // Split on double newlines to better handle the format
       const content = data.choices[0].message.content;
       const sections = content.split(/\d+\.\s+/);  // Split on "1. ", "2. ", etc.
-
-      // Clean up the sections
       return {
         topPicks: sections[1]?.trim()
           .split('\n')
@@ -138,12 +120,10 @@ export async function getAIRecommendations(restaurants, preferences) {
           .filter(line => line.startsWith('-'))
       };
     } catch (parseError) {
-      console.log('Error parsing Deepseek response:', parseError);
       return getSmartFallbackRecommendations(restaurants, preferences);
     }
 
   } catch (error) {
-    console.error('AI Recommendation Error:', error);
     return getSmartFallbackRecommendations(restaurants, preferences);
   }
 }
@@ -152,7 +132,6 @@ function getSmartFallbackRecommendations(restaurants, preferences) {
   const scoredRestaurants = restaurants.map(restaurant => {
     let score = 0;
 
-    // Vibe/atmosphere match (for fine dining)
     if (preferences.vibePreferences?.includes('fine dining')) {
       if (restaurant.features.includes('Fine Dining')) {
         score += 5;
@@ -161,16 +140,10 @@ function getSmartFallbackRecommendations(restaurants, preferences) {
         score += 3;
       }
     }
-
-    // Rating score (weighted more for fine dining)
     score += restaurant.rating * (preferences.vibePreferences?.includes('fine dining') ? 3 : 2);
-
-    // Price match
     if (preferences.priceRangePreference?.includes(restaurant.priceRange)) {
       score += 3;
     }
-
-    // Distance score
     const distanceScore = 5 - (restaurant.distance.value / 1);
     score += Math.max(0, distanceScore);
 
@@ -183,10 +156,10 @@ function getSmartFallbackRecommendations(restaurants, preferences) {
     .slice(0, 3);
 
   return {
-    topPicks: topThree.map(r => 
+    topPicks: topThree.map(r =>
       `- ${r.name} - ${r.priceRange} - ${r.features.join(', ')} - ${r.distance.text}`
     ),
-    explanations: topThree.map(r => 
+    explanations: topThree.map(r =>
       `- ${r.name} matches with ${r.rating}/5 rating, ${r.priceRange} price range, and ${r.distance.text} distance`
     ),
     additionalSuggestions: [
@@ -223,4 +196,4 @@ function getSpecialTips(restaurant) {
     return 'Popular spot, might have wait times during peak hours';
   }
   return 'Call ahead to check current wait times';
-} 
+}
