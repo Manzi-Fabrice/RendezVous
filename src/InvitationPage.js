@@ -46,7 +46,7 @@ const InvitationPage = () => {
             id: a._id || a.id,
             name: a.name,
             email: a.email,
-            fullObject: a // Log the full attendee object
+            fullObject: a 
           })));
         }
         setInvitation(data);
