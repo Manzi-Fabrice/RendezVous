@@ -24,7 +24,7 @@ Rendezvous leverages a full-stack architecture built for scalability and ease of
 
 ### Recommendation Engine
 
-- Integrated with DeepSeek (OpenAI-compatible model) to provide AI-generated suggestions for dates, restaurants, and activities
+- Integrated with DeepSeek to provide AI-generated suggestions for dates, restaurants, and activities
 - Prompts are dynamically generated based on user preferences and context
 
 ### Mapping and Location Services
@@ -48,26 +48,26 @@ Rendezvous leverages a full-stack architecture built for scalability and ease of
 
 To run the mobile app locally:
 
-- git clone 
-- cd Rendezvous 
-- npm install 
+- git clone
+- cd Rendezvous
+- npm install
 - npm run ios # or use npm run android if you're testing on Android
 
 - This requires Node.js, npm, and Expo CLI installed globally.
 
 ## Deployment
 
-- API backend: https://project-api-sustainable-waste.onrender.com  
-- Expo mobile deployment: [View on Expo](https://expo.dev/preview/update?message=clean-up%20and%20fixed%20styling&updateRuntimeVersion=1.0.0&createdAt=2025-03-14T05%3A52%3A54.719Z&slug=exp&projectId=34694a17-6315-44a0-82ad-714b9fe4fa7a&group=9ca7d351-1c95-4899-a7f3-ebd4e2f36b5a)  
-- Email web app: https://github.com/dartmouth-cs52-25w/Web-App-Sustainable.git
+- API backend: https://project-api-sustainable-waste.onrender.com
+- Expo mobile deployment: [View on Expo](https://expo.dev/preview/update?message=clean-up%20and%20fixed%20styling&updateRuntimeVersion=1.0.0&createdAt=2025-03-14T05%3A52%3A54.719Z&slug=exp&projectId=34694a17-6315-44a0-82ad-714b9fe4fa7a&group=9ca7d351-1c95-4899-a7f3-ebd4e2f36b5a)
+- Email web app: https://github.com/Manzi-Fabrice/RendezVous/tree/main/web-app  
 ### Expo credentials
 - username: dejanaypinto
 - Password: Rendezvous@123
 
 ## Authors
 
-- Dejanay Pinto  
-- Fabrice Manzi  
-- Ahmed Elmi  
-- Abdul-Kudus Alhassan  
+- Manzi Fabrice Niyigaba
+- Dejanay Pinto
+- Ahmed Elmi
+- Abdul-Kudus Alhassan
 - Miftah Meky
